@@ -1,3 +1,4 @@
+import { ResultCounts } from '../logic/progress';
 import { DailyStat, TrainingResult } from '../logic/types';
 import { calculateXP, isGoalMet } from '../logic/xp';
 import { execute, first, run } from './sql';
@@ -72,6 +73,15 @@ export class TrainingRepository {
   }
 
   async calculateTotalXP(): Promise<number> {
+    const counts = await this.getResultCounts();
+    return (
+      counts.wrong * calculateXP('wrong') +
+      counts.almost * calculateXP('almost') +
+      counts.correct * calculateXP('correct')
+    );
+  }
+
+  async getResultCounts(): Promise<ResultCounts> {
     const counts = await first<ResultCountsRow>(
       this.db,
       `SELECT
@@ -80,11 +90,11 @@ export class TrainingRepository {
         COALESCE(SUM(CASE WHEN result = 'correct' THEN 1 ELSE 0 END), 0) as correct
        FROM training_log`,
     );
-    return (
-      (counts?.wrong ?? 0) * calculateXP('wrong') +
-      (counts?.almost ?? 0) * calculateXP('almost') +
-      (counts?.correct ?? 0) * calculateXP('correct')
-    );
+    return {
+      wrong: counts?.wrong ?? 0,
+      almost: counts?.almost ?? 0,
+      correct: counts?.correct ?? 0,
+    };
   }
 
   async getDailyStat(date: string): Promise<DailyStat | null> {

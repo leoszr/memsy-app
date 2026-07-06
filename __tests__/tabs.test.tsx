@@ -71,6 +71,8 @@ describe('Sprint 0 tabs', () => {
     expect(
       (await render(<Train />)).getByText('Sem cards ainda ✦'),
     ).toBeTruthy();
-    expect((await render(<Progress />)).getByText('Progresso')).toBeTruthy();
+    expect(
+      (await render(<Progress />)).getByText('Você está evoluindo 🔥'),
+    ).toBeTruthy();
   });
 });

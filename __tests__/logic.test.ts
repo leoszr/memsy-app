@@ -6,6 +6,10 @@ import {
   nextCardState,
   seededRandom,
   Card,
+  buildWeeklyBars,
+  calculateProgressMetrics,
+  decideDailyReminder,
+  isStreakAtRisk,
 } from '../src/logic';
 
 const card = (overrides: Partial<Card> = {}): Card => ({
@@ -24,6 +28,90 @@ const card = (overrides: Partial<Card> = {}): Card => ({
   createdAt: '2026-01-01T00:00:00.000Z',
   lastTrainedAt: null,
   ...overrides,
+});
+
+describe('progress metrics and reminders', () => {
+  it('aggregates real progress metrics from cards and training results', () => {
+    expect(
+      calculateProgressMetrics(
+        [card({ status: 'mastered' }), card({ status: 'training' })],
+        { correct: 3, almost: 1, wrong: 2 },
+        {
+          date: '2026-01-07',
+          cardsTrained: 4,
+          cardsCorrect: 3,
+          goalMet: false,
+        },
+      ),
+    ).toEqual({
+      accuracy: 50,
+      savedCards: 2,
+      masteredCards: 1,
+      trainedToday: 4,
+    });
+  });
+
+  it('builds seven weekly bars ending today', () => {
+    const bars = buildWeeklyBars(
+      [{ date: '2026-01-07', cardsTrained: 7, cardsCorrect: 5, goalMet: true }],
+      '2026-01-07',
+    );
+    expect(bars).toHaveLength(7);
+    expect(bars.at(-1)).toMatchObject({
+      date: '2026-01-07',
+      cardsTrained: 7,
+      isToday: true,
+    });
+  });
+
+  it('detects streak risk only after 18h with yesterday met and today open', () => {
+    const stats = [
+      { date: '2026-01-06', cardsTrained: 10, cardsCorrect: 8, goalMet: true },
+    ];
+    expect(isStreakAtRisk(stats, new Date(2026, 0, 7, 17))).toBe(false);
+    expect(isStreakAtRisk(stats, new Date(2026, 0, 7, 18))).toBe(true);
+    expect(
+      isStreakAtRisk(
+        [
+          ...stats,
+          {
+            date: '2026-01-07',
+            cardsTrained: 10,
+            cardsCorrect: 8,
+            goalMet: true,
+          },
+        ],
+        new Date(2026, 0, 7, 20),
+      ),
+    ).toBe(false);
+  });
+
+  it('decides whether to schedule or cancel daily reminder', () => {
+    expect(
+      decideDailyReminder({ notificationHour: '20' }, null, [
+        card({ status: 'training' }),
+        card({ status: 'new' }),
+      ]),
+    ).toEqual({ action: 'schedule', hour: 20, minute: 0, cardsToReview: 2 });
+    expect(
+      decideDailyReminder(
+        {},
+        {
+          date: '2026-01-07',
+          cardsTrained: 10,
+          cardsCorrect: 8,
+          goalMet: true,
+        },
+        [],
+      ),
+    ).toEqual({ action: 'cancel', reason: 'goal-met' });
+    expect(
+      decideDailyReminder({ notificationsEnabled: 'false' }, null, []),
+    ).toEqual({
+      action: 'cancel',
+      reason: 'disabled',
+    });
+  });
 });
 
 describe('nextCardState', () => {

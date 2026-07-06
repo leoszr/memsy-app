@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   overlay: {
-    ...StyleSheet.absoluteFill,
+    position: 'absolute',
     top: -3,
     right: -3,
     bottom: -3,

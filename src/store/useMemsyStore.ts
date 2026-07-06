@@ -1,5 +1,6 @@
 import { createStore } from 'zustand/vanilla';
 import { useStore } from 'zustand';
+import { getLocalDate, ResultCounts } from '../logic/progress';
 import { Card, DailyStat, Settings, TrainingResult } from '../logic/types';
 import { nextCardState } from '../logic';
 import { CardRepository, NewCardInput } from '../db/CardRepository';
@@ -16,8 +17,11 @@ export type MemsyState = {
   cards: Card[];
   settings: Settings;
   todayStats: DailyStat | null;
+  dailyStats: DailyStat[];
+  resultCounts: ResultCounts;
   hydrated: boolean;
   hydrate(): Promise<void>;
+  refreshProgress(): Promise<void>;
   addCard(input: NewCardInput): Promise<Card>;
   saveCard(card: Card): Promise<void>;
   discardCard(id: string): Promise<void>;
@@ -29,13 +33,15 @@ export type MemsyState = {
   updateSettings(settings: Settings): Promise<void>;
 };
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => getLocalDate();
 
 export function createMemsyStore(repos: Repositories) {
   return createStore<MemsyState>((set, get) => ({
     cards: [],
     settings: {},
     todayStats: null,
+    dailyStats: [],
+    resultCounts: { wrong: 0, almost: 0, correct: 0 },
     hydrated: false,
     async hydrate() {
       const settings = await repos.settings.getAll();
@@ -43,16 +49,30 @@ export function createMemsyStore(repos: Repositories) {
       await repos.training.rebuildDailyStats(dailyGoal);
       const xp = await repos.training.calculateTotalXP();
       await repos.settings.set('xp', String(xp));
-      const [cards, todayStats] = await Promise.all([
+      const [cards, todayStats, dailyStats, resultCounts] = await Promise.all([
         repos.cards.getAll(),
         repos.training.getDailyStat(today()),
+        repos.training.getDailyStats(),
+        repos.training.getResultCounts(),
       ]);
       set({
         cards,
         settings: { ...settings, xp: String(xp) },
         todayStats,
+        dailyStats,
+        resultCounts,
         hydrated: true,
       });
+    },
+    async refreshProgress() {
+      const dailyGoal = Number(get().settings.dailyGoal ?? 10);
+      await repos.training.rebuildDailyStats(dailyGoal);
+      const [dailyStats, todayStats, resultCounts] = await Promise.all([
+        repos.training.getDailyStats(),
+        repos.training.getDailyStat(today()),
+        repos.training.getResultCounts(),
+      ]);
+      set({ dailyStats, todayStats, resultCounts });
     },
     async addCard(input) {
       const card = await repos.cards.create(input);
@@ -85,10 +105,16 @@ export function createMemsyStore(repos: Repositories) {
         dailyGoal,
       );
       const xp = await repos.training.calculateTotalXP();
+      const [dailyStats, resultCounts] = await Promise.all([
+        repos.training.getDailyStats(),
+        repos.training.getResultCounts(),
+      ]);
       await repos.settings.set('xp', String(xp));
       set({
         cards: get().cards.map((c) => (c.id === cardId ? updated : c)),
         todayStats,
+        dailyStats,
+        resultCounts,
         settings: { ...get().settings, xp: String(xp) },
       });
     },
@@ -104,6 +130,11 @@ export type MemsyStore = ReturnType<typeof createMemsyStore>;
 let store: MemsyStore | null = null;
 export function configureMemsyStore(repos: Repositories): MemsyStore {
   store = createMemsyStore(repos);
+  return store;
+}
+
+export function getMemsyStore(): MemsyStore {
+  if (!store) throw new Error('Memsy store not configured');
   return store;
 }
 

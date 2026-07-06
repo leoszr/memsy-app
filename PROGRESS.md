@@ -156,3 +156,55 @@ Status: ✅ Concluída
 - Lista do Deck usa `FlatList` nativa. `FlashList` fica como otimização futura se teste real com centenas de cards exigir.
 - Confetti implementado como celebração visual leve; animação/partículas reais podem ser refinadas no Sprint 6.
 - Validação manual em dispositivo físico, Maestro, 60fps no flip e teste de interrupção de sessão precisam ser feitos fora deste ambiente.
+
+## Downgrade Expo SDK 54
+
+Status: ✅ Concluído em branch `downgrade/sdk-54`
+
+### Entregas
+
+- Dependências gerenciadas Expo alinhadas ao SDK 54: Expo 54, React 19.1, React Native 0.81.5, Expo Router 6, Reanimated 4.1 e Worklets 0.5.1.
+- DevDependencies ajustadas para SDK 54: `jest-expo`/`babel-preset-expo` 54, `eslint-config-expo` 10, TypeScript 5.9, tipos React 19.1.
+- React Native Testing Library rebaixada para 13.3.3 com `react-test-renderer` 19.1.0 para compatibilidade com React 19.1.
+- `.npmrc` com `legacy-peer-deps=true` para manter instalação reproduzível com os peers opcionais do Expo Router no SDK 54.
+- `babel.config.js` simplificado: removido plugin antigo `react-native-reanimated/plugin`; SDK 54 injeta worklets pelo preset Expo.
+- Ajustes TypeScript para SDK 54/TS 5.9 em estilos absolutos (`StyleSheet.absoluteFill` sem spread).
+
+### Verificação local
+
+- `npx expo install --fix`: ✅ dependências atualizadas.
+- `npm ci --dry-run`: ✅ lockfile sincronizado.
+- `npx expo-doctor`: ✅ 18/18 checks passaram após isolar `node_modules` global de `/home/leo` que gerava falso positivo de React duplicado fora do repo.
+- `npx tsc --noEmit`: ✅ passou.
+- `npm run lint`: ✅ passou.
+- `npm test -- --runInBand`: ✅ passou (44 testes).
+
+### Observação
+
+- Smoke manual no Expo Go/dispositivo físico ainda precisa ser feito fora deste ambiente.
+
+## Sprint 5 — Progresso, streak e retenção
+
+Status: ✅ Concluída
+
+### Entregas
+
+- Tela Progresso substitui placeholder: fundo `coralFire`, widget de streak com 🔥, barra de meta diária, grid 2x2 de métricas e gráfico semanal de 7 barras.
+- Métricas vêm de dados-fonte: cards, `training_log` agregado por resultado e `daily_stats` reconstruído via repositório.
+- Streak usa `calculateStreak` e é recalculado ao abrir a tela.
+- Estado de streak em risco implementado com função pura: ontem bateu meta, hoje ainda não, após 18h local.
+- `expo-notifications` instalado e configurado; lembrete diário local é sincronizado após concluir sessão de treino.
+- Lógica pura de retenção em `src/logic/progress.ts`: métricas, barras semanais, risco de streak e decisão de agendar/cancelar notificação.
+- Tela Configurações (`/settings`) acessível pelo ⚙ nas telas Adicionar e Progresso: meta diária, horário/ativação de lembrete, idioma ativo, remoção de idioma com cards ocultos.
+- Store expõe `dailyStats`, `resultCounts` e `refreshProgress()` para manter Progresso atualizado sem contadores redundantes.
+
+### Verificação local
+
+- `npm run lint -- --fix`: ✅ passou.
+- `npx tsc --noEmit`: ✅ passou.
+- `npm test -- --runInBand`: ✅ passou (48 testes).
+
+### Observação
+
+- Teste real de notificação em dispositivo físico com horário +2 min ainda precisa ser feito fora deste ambiente.
+- Celebração de novo recorde de streak ficou registrada como dívida para polimento, porque exige persistir recorde exibido sem transformar streak em contador incrementado.
