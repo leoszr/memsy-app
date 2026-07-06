@@ -56,7 +56,7 @@ export function HardShadowBox({
 const styles = StyleSheet.create({
   root: { position: 'relative' },
   shadow: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     borderWidth: borders.regular,
     backgroundColor: colors.navyInk,
   },

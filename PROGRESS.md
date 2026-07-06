@@ -35,3 +35,40 @@ Status: ✅ Concluída
 - Splash agora prossegue em caso de erro no carregamento de fontes.
 - Husky agora executa `lint-staged` + testes.
 - AGENTS/CLAUDE corrigidos para evitar self-import.
+
+## Sprint 1 — Camada de dados e lógica de domínio
+
+Status: ✅ Concluída
+
+### Entregas
+
+- Schema SQLite versionado com migrations idempotentes: `cards`, `settings`, `training_log`, `daily_stats` e controle `migrations`.
+- `CardRepository` com CRUD, busca por status e contagem por status, usando prepared statements via `prepareAsync`.
+- Repositórios auxiliares para settings e treino/estatísticas diárias.
+- Lógica pura em `src/logic/`:
+  - `nextCardState` para status, streak, contadores e domínio de mastered/training.
+  - `buildTrainingQueue` com prioridade erradas > novas > training antigas > mastered fallback, shuffle por faixa e seed em testes.
+  - `calculateStreak` com datas locais `YYYY-MM-DD`.
+  - `calculateXP` e `isGoalMet`.
+- Store Zustand (`createMemsyStore`) conectada aos repositórios; persiste antes de atualizar memória.
+- Fluxos de integração sem UI: criar card, treinar até mastered, meta diária e XP persistido.
+
+### Verificação local
+
+- `npm run lint`: ✅ passou.
+- `npm test -- --runInBand`: ✅ passou (29 testes).
+- Cobertura por `jest --coverage`:
+  - `src/logic/`: ✅ 98.11% statements / 100% lines.
+  - `src/db/`: ✅ 86.88% statements / 88.46% lines.
+- `npx tsc --noEmit`: ✅ passou.
+
+### Observação
+
+- Validação manual em dispositivo físico e teste de reinstalação/primeira inicialização precisam ser feitos fora deste ambiente.
+
+### Correções pós-review Sprint 1
+
+- CardRepository preserva casing original da palavra para exibição; deduplicação case-insensitive passa a ser garantida por migration append-only `v2` com índice `COLLATE NOCASE`.
+- `daily_stats` e `settings.xp` deixam de ser incrementados em memória: agora são recalculados a partir de `training_log` após cada treino e no `hydrate()`.
+- Regra de meta diária usa `isGoalMet` de `src/logic/`, sem duplicar comparação no repositório.
+- Testes adicionados para preservação de casing e reconstrução de XP divergente a partir do log.

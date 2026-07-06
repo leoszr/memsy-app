@@ -17,6 +17,11 @@ exports[`HardShadowBox offsets shadow outside content bounds 1`] = `
         {
           "backgroundColor": "#1a1a2e",
           "borderWidth": 2.5,
+          "bottom": 0,
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 0,
         },
         {
           "borderColor": "#1a1a2e",
@@ -67,6 +72,11 @@ exports[`HardShadowBox renders with default props 1`] = `
         {
           "backgroundColor": "#1a1a2e",
           "borderWidth": 2.5,
+          "bottom": 0,
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 0,
         },
         {
           "borderColor": "#1a1a2e",
