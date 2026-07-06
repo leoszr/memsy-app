@@ -77,7 +77,7 @@ export function GameButton({
 const styles = StyleSheet.create({
   root: { position: 'relative', minHeight: 60 },
   shadow: {
-    ...StyleSheet.absoluteFill,
+    position: 'absolute',
     left: shadows.hard.x - 1,
     top: shadows.hard.y - 2,
     right: -(shadows.hard.x - 1),

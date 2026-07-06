@@ -450,7 +450,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   sheetBackdrop: {
-    ...StyleSheet.absoluteFill,
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
     zIndex: 5,
     padding: 22,
     justifyContent: 'center',

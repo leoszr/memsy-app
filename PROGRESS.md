@@ -156,3 +156,29 @@ Status: ✅ Concluída
 - Lista do Deck usa `FlatList` nativa. `FlashList` fica como otimização futura se teste real com centenas de cards exigir.
 - Confetti implementado como celebração visual leve; animação/partículas reais podem ser refinadas no Sprint 6.
 - Validação manual em dispositivo físico, Maestro, 60fps no flip e teste de interrupção de sessão precisam ser feitos fora deste ambiente.
+
+## Downgrade Expo SDK 54
+
+Status: ✅ Concluído em branch `downgrade/sdk-54`
+
+### Entregas
+
+- Dependências gerenciadas Expo alinhadas ao SDK 54: Expo 54, React 19.1, React Native 0.81.5, Expo Router 6, Reanimated 4.1 e Worklets 0.5.1.
+- DevDependencies ajustadas para SDK 54: `jest-expo`/`babel-preset-expo` 54, `eslint-config-expo` 10, TypeScript 5.9, tipos React 19.1.
+- React Native Testing Library rebaixada para 13.3.3 com `react-test-renderer` 19.1.0 para compatibilidade com React 19.1.
+- `.npmrc` com `legacy-peer-deps=true` para manter instalação reproduzível com os peers opcionais do Expo Router no SDK 54.
+- `babel.config.js` simplificado: removido plugin antigo `react-native-reanimated/plugin`; SDK 54 injeta worklets pelo preset Expo.
+- Ajustes TypeScript para SDK 54/TS 5.9 em estilos absolutos (`StyleSheet.absoluteFill` sem spread).
+
+### Verificação local
+
+- `npx expo install --fix`: ✅ dependências atualizadas.
+- `npm ci --dry-run`: ✅ lockfile sincronizado.
+- `npx expo-doctor`: ✅ 18/18 checks passaram após isolar `node_modules` global de `/home/leo` que gerava falso positivo de React duplicado fora do repo.
+- `npx tsc --noEmit`: ✅ passou.
+- `npm run lint`: ✅ passou.
+- `npm test -- --runInBand`: ✅ passou (44 testes).
+
+### Observação
+
+- Smoke manual no Expo Go/dispositivo físico ainda precisa ser feito fora deste ambiente.
