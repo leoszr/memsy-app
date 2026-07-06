@@ -8,6 +8,7 @@ import {
 } from '@expo-google-fonts/nunito';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { GameButton } from '../src/components/GameButton';
 import { bootstrapMemsyStore } from '../src/store/appStore';
 import { colors, fonts } from '../src/theme/tokens';
@@ -72,10 +73,15 @@ export default function RootLayout() {
     );
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <GestureHandlerRootView style={styles.root}>
+      <Stack screenOptions={{ headerShown: false }} />
+    </GestureHandlerRootView>
+  );
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1 },
   center: {
     flex: 1,
     gap: 16,

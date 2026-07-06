@@ -99,3 +99,30 @@ Status: ✅ Concluída
 
 - Validação em dispositivo físico, Maestro e checagem de 60fps precisam ser feitas fora deste ambiente.
 - Transição onboarding→tabs usa navegação nativa do Expo Router; ajuste fino de bounce visual pode ser refinado após teste em dispositivo.
+
+## Sprint 3 — Captura, tradução e swipe
+
+Status: ✅ Concluída
+
+### Entregas
+
+- Serviço de tradução com interface `translate(word, from, to)` e implementação DeepL via `fetch`.
+- Erros tipados para configuração, timeout, rede, HTTP e tradução vazia; timeout padrão de 8s.
+- Cache local em SQLite com migration append-only `v3` (`translation_cache`) e repositório dedicado.
+- Tela Adicionar fiel ao protótipo: fundo `chalkWhite`, blobs, input com HardShadowBox/foco `gameBlue`, botão com pulse de loading, toast estilizado e ações Câmera/Voz/Colar.
+- Colar integrado com `expo-clipboard`; Câmera e Voz mostram badge/toast `EM BREVE`.
+- Card de tradução com palavra, fonética, divisor tracejado, tradução, badge de classe gramatical e áudio via `expo-speech`.
+- Swipe implementado com Gesture Handler + Reanimated worklets: rotação proporcional, overlays `SALVO! ✓`/`FORA ✗`, threshold de 40% da largura, fly-out e retorno com spring.
+- Haptics com `expo-haptics` no threshold e no salvamento; botões laterais acessíveis como alternativa ao gesto.
+- Persistência do fluxo: salvar cria card `new`, descartar não persiste, duplicata case-insensitive no mesmo par é bloqueada antes da API.
+
+### Verificação local
+
+- `npm run lint`: ✅ passou.
+- `npm test -- --runInBand`: ✅ passou (41 testes).
+- `npx tsc --noEmit`: ✅ passou.
+
+### Observação
+
+- Tradução real exige `.env` com `EXPO_PUBLIC_DEEPL_API_KEY` (não commitado).
+- Validação manual em dispositivo físico, Maestro e checagem de 60fps/haptics precisam ser feitas fora deste ambiente.

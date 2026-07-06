@@ -18,6 +18,7 @@ describe('database layer', () => {
       'migrations',
       'settings',
       'training_log',
+      'translation_cache',
     ]);
   });
 

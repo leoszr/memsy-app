@@ -31,6 +31,7 @@ export class FakeDb implements SQLiteDatabaseLike {
   tables = new Set<string>();
   cards: Row[] = [];
   settings = new Map<string, string>();
+  translationCache: Row[] = [];
   dailyStats: Row[] = [];
   trainingLog: Row[] = [];
   prepared: string[] = [];
@@ -42,6 +43,7 @@ export class FakeDb implements SQLiteDatabaseLike {
       'settings',
       'training_log',
       'daily_stats',
+      'translation_cache',
     ]) {
       if (source.includes(`CREATE TABLE IF NOT EXISTS ${table}`))
         this.tables.add(table);
@@ -195,6 +197,39 @@ export class FakeDb implements SQLiteDatabaseLike {
         card_id: p[1] as string,
         result: p[2] as string,
         trained_at: p[3] as string,
+      });
+      return { rows: [], changes: 1 };
+    }
+    if (source.includes('SELECT * FROM translation_cache')) {
+      return {
+        rows: this.translationCache.filter(
+          (r) =>
+            String(r.word).toLocaleLowerCase() ===
+              String(p[0]).toLocaleLowerCase() &&
+            r.lang_from === p[1] &&
+            r.lang_to === p[2],
+        ) as T[],
+        changes: 0,
+      };
+    }
+    if (source.startsWith('INSERT OR REPLACE INTO translation_cache')) {
+      this.translationCache = this.translationCache.filter(
+        (r) =>
+          !(
+            String(r.word).toLocaleLowerCase() ===
+              String(p[0]).toLocaleLowerCase() &&
+            r.lang_from === p[1] &&
+            r.lang_to === p[2]
+          ),
+      );
+      this.translationCache.push({
+        word: p[0] as string,
+        lang_from: p[1] as string,
+        lang_to: p[2] as string,
+        translation: p[3] as string,
+        phonetic: p[4] as string | null,
+        gram_class: p[5] as string | null,
+        created_at: p[6] as string,
       });
       return { rows: [], changes: 1 };
     }

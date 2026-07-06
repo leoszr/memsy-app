@@ -51,7 +51,7 @@ jest.mock('expo-router', () => {
     <Text accessibilityRole="tab">{options.title}</Text>
   );
 
-  return { Tabs };
+  return { Tabs, useRouter: () => ({ push: jest.fn(), replace: jest.fn() }) };
 });
 
 describe('Sprint 0 tabs', () => {

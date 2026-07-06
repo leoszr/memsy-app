@@ -4,3 +4,4 @@ export * from './trainingQueue';
 export * from './streak';
 export * from './xp';
 export * from './onboarding';
+export * from './duplicates';

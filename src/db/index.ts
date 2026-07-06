@@ -3,14 +3,30 @@ import { SQLiteDatabaseLike } from './types';
 export * from './CardRepository';
 export * from './SettingsRepository';
 export * from './TrainingRepository';
+export * from './TranslationCacheRepository';
 export * from './migrations';
 export * from './types';
+
+const dbPromises = new Map<string, Promise<SQLiteDatabaseLike>>();
 
 export async function openMemsyDatabase(
   name = 'memsy.db',
 ): Promise<SQLiteDatabaseLike> {
-  const { openDatabaseAsync } = await import('expo-sqlite');
-  const db = await openDatabaseAsync(name);
-  await runMigrations(db as unknown as SQLiteDatabaseLike);
-  return db as unknown as SQLiteDatabaseLike;
+  const existing = dbPromises.get(name);
+  if (existing) return existing;
+
+  const promise = import('expo-sqlite')
+    .then(async ({ openDatabaseAsync }) => {
+      const db = (await openDatabaseAsync(
+        name,
+      )) as unknown as SQLiteDatabaseLike;
+      await runMigrations(db);
+      return db;
+    })
+    .catch((error) => {
+      dbPromises.delete(name);
+      throw error;
+    });
+  dbPromises.set(name, promise);
+  return promise;
 }

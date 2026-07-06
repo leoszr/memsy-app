@@ -45,6 +45,23 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_cards_word_pair_nocase
 ON cards(word COLLATE NOCASE, lang_from, lang_to);
 `,
   },
+  {
+    version: 3,
+    sql: `
+CREATE TABLE IF NOT EXISTS translation_cache (
+  word TEXT NOT NULL,
+  lang_from TEXT NOT NULL,
+  lang_to TEXT NOT NULL,
+  translation TEXT NOT NULL,
+  phonetic TEXT,
+  gram_class TEXT,
+  created_at TEXT NOT NULL,
+  PRIMARY KEY (word, lang_from, lang_to)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_translation_cache_word_pair_nocase
+ON translation_cache(word COLLATE NOCASE, lang_from, lang_to);
+`,
+  },
 ];
 
 export async function runMigrations(db: SQLiteDatabaseLike): Promise<void> {
