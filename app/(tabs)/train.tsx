@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import Animated, {
@@ -15,6 +15,7 @@ import {
   summarizeSession,
 } from '../../src/logic';
 import { Card, TrainingResult } from '../../src/logic/types';
+import { syncDailyReminder } from '../../src/services/notifications';
 import { useMemsyStore } from '../../src/store/useMemsyStore';
 import { borders, colors, fonts, radii } from '../../src/theme/tokens';
 
@@ -46,6 +47,7 @@ export default function Train() {
   const [revealed, setRevealed] = useState(false);
   const [answers, setAnswers] = useState<AnswerLog[]>([]);
   const [finished, setFinished] = useState(false);
+  const [reminderSynced, setReminderSynced] = useState(false);
   const [goalSheet, setGoalSheet] = useState(
     !settings.dailyGoal && cards.length > 0,
   );
@@ -70,6 +72,14 @@ export default function Train() {
     ],
   }));
 
+  useEffect(() => {
+    if (!finished || reminderSynced) return;
+    setReminderSynced(true);
+    syncDailyReminder(settings, todayStats, cards, updateSettings).catch(
+      () => undefined,
+    );
+  }, [cards, finished, reminderSynced, settings, todayStats, updateSettings]);
+
   function startSession(includeMastered = true) {
     const next = includeMastered
       ? buildTrainingQueue(cards, 10)
@@ -82,6 +92,7 @@ export default function Train() {
     setIndex(0);
     setAnswers([]);
     setFinished(false);
+    setReminderSynced(false);
     setRevealed(false);
     flip.value = 0;
   }

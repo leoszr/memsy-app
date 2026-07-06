@@ -5,4 +5,6 @@ export * from './streak';
 export * from './xp';
 export * from './onboarding';
 export * from './duplicates';
+export * from './languages';
+export * from './progress';
 export * from './session';

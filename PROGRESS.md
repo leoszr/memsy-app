@@ -182,3 +182,29 @@ Status: ✅ Concluído em branch `downgrade/sdk-54`
 ### Observação
 
 - Smoke manual no Expo Go/dispositivo físico ainda precisa ser feito fora deste ambiente.
+
+## Sprint 5 — Progresso, streak e retenção
+
+Status: ✅ Concluída
+
+### Entregas
+
+- Tela Progresso substitui placeholder: fundo `coralFire`, widget de streak com 🔥, barra de meta diária, grid 2x2 de métricas e gráfico semanal de 7 barras.
+- Métricas vêm de dados-fonte: cards, `training_log` agregado por resultado e `daily_stats` reconstruído via repositório.
+- Streak usa `calculateStreak` e é recalculado ao abrir a tela.
+- Estado de streak em risco implementado com função pura: ontem bateu meta, hoje ainda não, após 18h local.
+- `expo-notifications` instalado e configurado; lembrete diário local é sincronizado após concluir sessão de treino.
+- Lógica pura de retenção em `src/logic/progress.ts`: métricas, barras semanais, risco de streak e decisão de agendar/cancelar notificação.
+- Tela Configurações (`/settings`) acessível pelo ⚙ nas telas Adicionar e Progresso: meta diária, horário/ativação de lembrete, idioma ativo, remoção de idioma com cards ocultos.
+- Store expõe `dailyStats`, `resultCounts` e `refreshProgress()` para manter Progresso atualizado sem contadores redundantes.
+
+### Verificação local
+
+- `npm run lint -- --fix`: ✅ passou.
+- `npx tsc --noEmit`: ✅ passou.
+- `npm test -- --runInBand`: ✅ passou (48 testes).
+
+### Observação
+
+- Teste real de notificação em dispositivo físico com horário +2 min ainda precisa ser feito fora deste ambiente.
+- Celebração de novo recorde de streak ficou registrada como dívida para polimento, porque exige persistir recorde exibido sem transformar streak em contador incrementado.

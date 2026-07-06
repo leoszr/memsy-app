@@ -139,7 +139,7 @@ export default function Add() {
           accessibilityRole="button"
           accessibilityLabel="Configurações"
           style={styles.settings}
-          onPress={() => setToast('Configurações vêm no Sprint 5.')}
+          onPress={() => router.push('/settings')}
         >
           <Text style={styles.settingsText}>⚙</Text>
         </Pressable>

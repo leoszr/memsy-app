@@ -12,6 +12,13 @@ import { FakeDb } from './helpers/fakeDb';
 
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
+jest.mock('expo-notifications', () => ({
+  SchedulableTriggerInputTypes: { DAILY: 'daily' },
+  cancelScheduledNotificationAsync: jest.fn(),
+  getPermissionsAsync: jest.fn(() => Promise.resolve({ granted: true })),
+  requestPermissionsAsync: jest.fn(() => Promise.resolve({ granted: true })),
+  scheduleNotificationAsync: jest.fn(() => Promise.resolve('reminder-id')),
+}));
 jest.mock('react-native-reanimated', () => {
   const { View } = require('react-native');
   return {
