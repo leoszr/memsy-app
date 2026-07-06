@@ -24,6 +24,7 @@ src/theme/        tokens.ts — cores, bordas, sombras, raios
 
 - Leia `docs/memsy_plano_desenvolvimento.md` antes de iniciar qualquer sprint.
 - Use o plano como fonte de verdade para escopo, critérios de aceite, testes e DoD.
+- Use `docs/Memsy Protótipo v2.html` como protótipo visual canônico do app. Toda UI implementada deve seguir seu estilo, composição, cores, sombras, bordas, tipografia, botões, cards, bottom tabs e microinterações. Em conflito visual entre plano e protótipo, o protótipo prevalece.
 - Mantenha `PROGRESS.md` atualizado.
 - Ao terminar cada sprint, marque a sprint como concluída em `PROGRESS.md`.
 - `CLAUDE.md` deve apontar para este arquivo com `@AGENTS.md`; este arquivo não deve importar a si mesmo.
@@ -45,7 +46,7 @@ Estilo: maximalista, game & fun. Anti-minimalismo.
 
 - Sombras: duras, offset sólido, sem blur — `4px 4px 0 navyInk` (componentes), `6px 6px 0` (cards). Implementadas como `View` deslocada atrás (RN não tem box-shadow offset sólido confiável).
 - Bordas: 2.5–3px `navyInk` em tudo que é interativo.
-- Fonte: Nunito (400/700/900). Títulos e botões: 900, uppercase.
+- Fonte: seguir o protótipo: Fredoka para display/headlines quando disponível; Nunito para corpo/UI (400/700/900). Títulos e botões: peso alto, uppercase quando indicado.
 - Botões: efeito físico ao pressionar — translate(3,3) + sombra some.
 - Fundo branco puro (`#fff`) proibido — usar `chalkWhite` (`#fffdf5`). Fundos de tela são coloridos por tela (ver tokens).
 - Cards levemente rotacionados (±1.5°).
