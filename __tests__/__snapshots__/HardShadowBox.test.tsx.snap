@@ -1,0 +1,105 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HardShadowBox offsets shadow outside content bounds 1`] = `
+<View
+  style={
+    [
+      {
+        "position": "relative",
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#1a1a2e",
+          "borderWidth": 2.5,
+        },
+        {
+          "borderColor": "#1a1a2e",
+          "borderRadius": 30,
+          "bottom": -10,
+          "left": 9,
+          "right": -9,
+          "top": 10,
+        },
+      ]
+    }
+    testID="hard-shadow"
+  />
+  <View
+    style={
+      [
+        {
+          "borderWidth": 2.5,
+          "overflow": "hidden",
+        },
+        {
+          "backgroundColor": "#ecc30b",
+          "borderColor": "#1a1a2e",
+          "borderRadius": 30,
+        },
+        undefined,
+      ]
+    }
+    testID="hard-shadow-content"
+  />
+</View>
+`;
+
+exports[`HardShadowBox renders with default props 1`] = `
+<View
+  style={
+    [
+      {
+        "position": "relative",
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#1a1a2e",
+          "borderWidth": 2.5,
+        },
+        {
+          "borderColor": "#1a1a2e",
+          "borderRadius": 22,
+          "bottom": -6,
+          "left": 5,
+          "right": -5,
+          "top": 6,
+        },
+      ]
+    }
+    testID="hard-shadow"
+  />
+  <View
+    style={
+      [
+        {
+          "borderWidth": 2.5,
+          "overflow": "hidden",
+        },
+        {
+          "backgroundColor": "#fffdf5",
+          "borderColor": "#1a1a2e",
+          "borderRadius": 22,
+        },
+        undefined,
+      ]
+    }
+    testID="hard-shadow-content"
+  >
+    <Text>
+      Memsy
+    </Text>
+  </View>
+</View>
+`;

@@ -1,3 +1,8 @@
-# Expo HAS CHANGED
+# AGENTS.md
 
-Read the exact versioned docs at https://docs.expo.dev/versions/v57.0.0/ before writing any code.
+## Project Progress Tracking
+
+- Leia `docs/memsy_plano_desenvolvimento.md` antes de iniciar qualquer sprint.
+- Mantenha `PROGRESS.md` atualizado.
+- Ao terminar cada sprint, marque a sprint como concluída em `PROGRESS.md`.
+- `CLAUDE.md` deve apontar para este arquivo com `@AGENTS.md`; este arquivo não deve importar a si mesmo.
