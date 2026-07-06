@@ -72,3 +72,30 @@ Status: ✅ Concluída
 - `daily_stats` e `settings.xp` deixam de ser incrementados em memória: agora são recalculados a partir de `training_log` após cada treino e no `hydrate()`.
 - Regra de meta diária usa `isGoalMet` de `src/logic/`, sem duplicar comparação no repositório.
 - Testes adicionados para preservação de casing e reconstrução de XP divergente a partir do log.
+
+## Sprint 2 — Onboarding e configuração
+
+Status: ✅ Concluída
+
+### Entregas
+
+- Gate inicial com `app/index.tsx`: sem idiomas configurados redireciona para onboarding; com config vai para tabs.
+- Bootstrap do store no layout raiz: abre SQLite, roda migrations, hidrata Zustand antes de liberar a navegação.
+- Tela de onboarding passo 1 fiel ao protótipo: fundo amberBlast, logo rotacionado, decoração e grade 2 colunas de idiomas.
+- Tela de onboarding passo 2: fundo gameBlue, seleção múltipla, idioma nativo oculto e persistência de settings.
+- Botões `GameButton` com efeito físico de pressionar e estado disabled.
+- Animações de seleção com Reanimated spring em cards de idioma.
+- Lógica pura de onboarding em `src/logic/onboarding.ts`: gate, parse dos idiomas e troca de idioma ativo.
+- `LanguagePairPill` na tela Adicionar com bottom sheet para trocar o par ativo e persistir em `settings`.
+- Testes RNTL do fluxo: selecionar idioma nativo → avançar → escolher idiomas de aprendizado → persistir settings → navegar para tabs.
+
+### Verificação local
+
+- `npm run lint`: ✅ passou.
+- `npm test -- --runInBand`: ✅ passou (33 testes).
+- `npx tsc --noEmit`: ✅ passou.
+
+### Observação
+
+- Validação em dispositivo físico, Maestro e checagem de 60fps precisam ser feitas fora deste ambiente.
+- Transição onboarding→tabs usa navegação nativa do Expo Router; ajuste fino de bounce visual pode ser refinado após teste em dispositivo.

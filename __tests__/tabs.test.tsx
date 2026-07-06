@@ -4,7 +4,10 @@ import { render } from '@testing-library/react-native';
 
 jest.mock('react-native-reanimated', () => ({
   __esModule: true,
-  default: { View: require('react-native').View },
+  default: {
+    View: require('react-native').View,
+    createAnimatedComponent: (component: unknown) => component,
+  },
   useSharedValue: (value: unknown) => ({ value }),
   useAnimatedStyle: (factory: () => unknown) => factory(),
   withRepeat: (value: unknown) => value,
@@ -15,6 +18,26 @@ import Add from '../app/(tabs)/add';
 import Cards from '../app/(tabs)/cards';
 import Train from '../app/(tabs)/train';
 import Progress from '../app/(tabs)/progress';
+
+import {
+  CardRepository,
+  SettingsRepository,
+  TrainingRepository,
+} from '../src/db';
+import { configureMemsyStore } from '../src/store/useMemsyStore';
+import { FakeDb } from './helpers/fakeDb';
+
+function configureUiStore() {
+  const db = new FakeDb();
+  db.settings.set('nativeLanguage', 'pt');
+  db.settings.set('learningLanguages', '["fr"]');
+  db.settings.set('activeLearningLanguage', 'fr');
+  configureMemsyStore({
+    cards: new CardRepository(db),
+    settings: new SettingsRepository(db),
+    training: new TrainingRepository(db),
+  });
+}
 
 jest.mock('expo-router', () => {
   const React = require('react');
@@ -42,6 +65,7 @@ describe('Sprint 0 tabs', () => {
   });
 
   it('renders each initial tab screen without crashing', async () => {
+    configureUiStore();
     expect((await render(<Add />)).getByText('Nova palavra ✦')).toBeTruthy();
     expect((await render(<Cards />)).getByText('Meus Cards')).toBeTruthy();
     expect((await render(<Train />)).getByText('Treinar')).toBeTruthy();

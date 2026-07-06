@@ -6,6 +6,7 @@ export const colors = {
   lobster: '#d56062',
   memsyGreen: '#05a77d',
   navyInk: '#1a1a2e',
+  navyInkScrim: 'rgba(26, 26, 46, 0.35)',
   chalkWhite: '#fffdf5',
   bubbleGum: '#ffb3c6',
   mintPop: '#b8f0e0',

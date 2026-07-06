@@ -76,16 +76,14 @@ describe('store integration', () => {
   it('persists actions and hydrates from repositories', async () => {
     const { db, store } = setup();
     await store.getState().updateSettings({ dailyGoal: '2' });
-    const card = await store
-      .getState()
-      .addCard({
-        id: 'c1',
-        word: 'chat',
-        translation: 'gato',
-        langFrom: 'fr',
-        langTo: 'pt',
-        createdAt: '2026-01-01',
-      });
+    const card = await store.getState().addCard({
+      id: 'c1',
+      word: 'chat',
+      translation: 'gato',
+      langFrom: 'fr',
+      langTo: 'pt',
+      createdAt: '2026-01-01',
+    });
     await store
       .getState()
       .recordTrainingResult(card.id, 'correct', '2026-01-02T10:00:00.000Z');
@@ -101,15 +99,13 @@ describe('store integration', () => {
   it('full flow masters card in database after three correct answers', async () => {
     const { db, store } = setup();
     await store.getState().updateSettings({ dailyGoal: '3' });
-    const card = await store
-      .getState()
-      .addCard({
-        id: 'c1',
-        word: 'eau',
-        translation: 'água',
-        langFrom: 'fr',
-        langTo: 'pt',
-      });
+    const card = await store.getState().addCard({
+      id: 'c1',
+      word: 'eau',
+      translation: 'água',
+      langFrom: 'fr',
+      langTo: 'pt',
+    });
     await store
       .getState()
       .recordTrainingResult(card.id, 'correct', '2026-01-02T10:00:00.000Z');
@@ -127,15 +123,13 @@ describe('store integration', () => {
   it('day flow marks goal met and next day keeps streak data', async () => {
     const { db, store } = setup();
     await store.getState().updateSettings({ dailyGoal: '1' });
-    const card = await store
-      .getState()
-      .addCard({
-        id: 'c1',
-        word: 'pain',
-        translation: 'pão',
-        langFrom: 'fr',
-        langTo: 'pt',
-      });
+    const card = await store.getState().addCard({
+      id: 'c1',
+      word: 'pain',
+      translation: 'pão',
+      langFrom: 'fr',
+      langTo: 'pt',
+    });
     await store
       .getState()
       .recordTrainingResult(card.id, 'wrong', '2026-01-31T12:00:00.000Z');
