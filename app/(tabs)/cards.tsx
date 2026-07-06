@@ -1,11 +1,201 @@
-import { SprintZeroScreen } from '../../src/components/SprintZeroScreen';
-import { colors } from '../../src/theme/tokens';
+import { useMemo, useState } from 'react';
+import {
+  Alert,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { GameButton } from '../../src/components/GameButton';
+import { HardShadowBox } from '../../src/components/HardShadowBox';
+import { Card, CardStatus } from '../../src/logic/types';
+import { useMemsyStore } from '../../src/store/useMemsyStore';
+import { borders, colors, fonts, radii } from '../../src/theme/tokens';
+
+const statusLabel: Record<CardStatus, string> = {
+  new: 'NOVA',
+  training: 'EM TREINO',
+  mastered: 'DOMINADA',
+};
+const statusColor: Record<CardStatus, string> = {
+  new: colors.amberBlast,
+  training: colors.sky,
+  mastered: colors.mintPop,
+};
+
 export default function Cards() {
+  const router = useRouter();
+  const cards = useMemsyStore((state) => state.cards);
+  const discardCard = useMemsyStore((state) => state.discardCard);
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const counts = useMemo(
+    () => ({
+      total: cards.length,
+      mastered: cards.filter((c) => c.status === 'mastered').length,
+    }),
+    [cards],
+  );
+
+  async function remove(card: Card) {
+    const run = async () => discardCard(card.id);
+    if (typeof Alert.alert === 'function') {
+      Alert.alert('Apagar card?', `"${card.word}" sai do deck.`, [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'APAGAR', style: 'destructive', onPress: run },
+      ]);
+    } else await run();
+  }
+
   return (
-    <SprintZeroScreen
-      title="Meus Cards"
-      subtitle="Deck entra nas próximas sprints."
-      color={colors.sky}
-    />
+    <View style={styles.screen}>
+      <View style={styles.header}>
+        <Text style={styles.eyebrow}>DECK</Text>
+        <Text style={styles.title}>Meus Cards ✦</Text>
+        <Text style={styles.count}>
+          {counts.total} salvos · {counts.mastered} dominados
+        </Text>
+      </View>
+      {cards.length === 0 ? (
+        <View style={styles.empty}>
+          <Text style={styles.emptyIcon}>✨</Text>
+          <Text style={styles.emptyTitle}>Adicione sua primeira palavra!</Text>
+          <Text style={styles.emptyText}>
+            Capture, traduza e salve cards para treinar aqui.
+          </Text>
+          <GameButton
+            backgroundColor={colors.gameBlue}
+            color={colors.chalkWhite}
+            onPress={() => router.push('/(tabs)/add')}
+          >
+            ADICIONAR ✦
+          </GameButton>
+        </View>
+      ) : (
+        <FlatList
+          data={cards}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.list}
+          renderItem={({ item, index }) => (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Card ${item.word}. Toque para opções de apagar`}
+              onLongPress={() => remove(item)}
+              onPress={() =>
+                setPendingDelete(pendingDelete === item.id ? null : item.id)
+              }
+            >
+              <HardShadowBox
+                backgroundColor={colors.chalkWhite}
+                radius={radii.lg}
+                offsetX={5}
+                offsetY={6}
+                style={[
+                  styles.cardWrap,
+                  {
+                    transform: [
+                      { rotate: index % 2 === 0 ? '-1.5deg' : '1.5deg' },
+                    ],
+                  },
+                ]}
+                contentStyle={styles.card}
+              >
+                <View style={styles.cardTop}>
+                  <View>
+                    <Text style={styles.word}>{item.word}</Text>
+                    <Text style={styles.translation}>{item.translation}</Text>
+                  </View>
+                  <View
+                    style={[
+                      styles.badge,
+                      { backgroundColor: statusColor[item.status] },
+                    ]}
+                  >
+                    <Text style={styles.badgeText}>
+                      {statusLabel[item.status]}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={styles.meta}>
+                  {item.timesTrained} treinos · streak {item.correctStreak}/3
+                </Text>
+                {pendingDelete === item.id && (
+                  <GameButton
+                    backgroundColor={colors.lobster}
+                    color={colors.chalkWhite}
+                    style={styles.deleteButton}
+                    onPress={() => remove(item)}
+                  >
+                    APAGAR CARD
+                  </GameButton>
+                )}
+              </HardShadowBox>
+            </Pressable>
+          )}
+        />
+      )}
+      {cards.length > 0 && (
+        <View style={styles.cta}>
+          <GameButton
+            backgroundColor={colors.navyInk}
+            color={colors.amberBlast}
+            onPress={() => router.push('/(tabs)/train')}
+          >
+            TREINAR AGORA →
+          </GameButton>
+        </View>
+      )}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: colors.sky,
+    paddingTop: 68,
+    paddingHorizontal: 20,
+  },
+  header: { marginBottom: 14 },
+  eyebrow: { fontFamily: fonts.black, color: colors.navyInk, letterSpacing: 2 },
+  title: { fontFamily: fonts.black, color: colors.navyInk, fontSize: 34 },
+  count: { fontFamily: fonts.bold, color: colors.navyInk, fontSize: 16 },
+  list: { paddingBottom: 124, gap: 16, paddingTop: 8 },
+  cardWrap: { marginBottom: 16 },
+  card: { padding: 16 },
+  cardTop: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
+  word: { fontFamily: fonts.black, color: colors.navyInk, fontSize: 27 },
+  translation: {
+    fontFamily: fonts.bold,
+    color: colors.memsyGreen,
+    fontSize: 18,
+    marginTop: 2,
+  },
+  meta: { marginTop: 12, fontFamily: fonts.bold, color: colors.navyInkScrim },
+  badge: {
+    borderWidth: borders.regular,
+    borderColor: colors.navyInk,
+    borderRadius: radii.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    alignSelf: 'flex-start',
+  },
+  badgeText: { fontFamily: fonts.black, color: colors.navyInk, fontSize: 11 },
+  deleteButton: { marginTop: 14 },
+  cta: { position: 'absolute', left: 20, right: 20, bottom: 96 },
+  empty: { flex: 1, justifyContent: 'center', gap: 12, paddingBottom: 80 },
+  emptyIcon: { fontSize: 54, textAlign: 'center' },
+  emptyTitle: {
+    fontFamily: fonts.black,
+    color: colors.navyInk,
+    fontSize: 28,
+    textAlign: 'center',
+  },
+  emptyText: {
+    fontFamily: fonts.bold,
+    color: colors.navyInk,
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+});

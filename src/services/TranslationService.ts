@@ -1,6 +1,7 @@
 import Constants from 'expo-constants';
 import { TranslationCacheRepository } from '../db/TranslationCacheRepository';
 import { openMemsyDatabase } from '../db';
+import { SQLiteDatabaseLike } from '../db/types';
 import {
   TranslationError,
   TranslationResult,
@@ -114,6 +115,16 @@ export class DeepLTranslationService implements TranslationService {
 }
 
 let singleton: Promise<TranslationService> | null = null;
+
+export function configureDefaultTranslationService(
+  db: SQLiteDatabaseLike,
+): TranslationService {
+  const service = new DeepLTranslationService({
+    cache: new TranslationCacheRepository(db),
+  });
+  singleton = Promise.resolve(service);
+  return service;
+}
 
 export function getDefaultTranslationService(): Promise<TranslationService> {
   if (!singleton) {

@@ -117,6 +117,13 @@ export default function Add() {
           result={pending.result}
           onSave={savePending}
           onDiscard={discardPending}
+          onError={(error) =>
+            setToast(
+              error instanceof Error
+                ? error.message
+                : 'Não consegui salvar o card.',
+            )
+          }
         />
         {toast && <Toast message={toast} />}
       </View>

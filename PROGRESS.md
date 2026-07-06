@@ -126,3 +126,33 @@ Status: ✅ Concluída
 
 - Tradução real exige `.env` com `EXPO_PUBLIC_DEEPL_API_KEY` (não commitado).
 - Validação manual em dispositivo físico, Maestro e checagem de 60fps/haptics precisam ser feitas fora deste ambiente.
+
+## Sprint 4 — Treino e sessões
+
+Status: ✅ Concluída
+
+### Entregas
+
+- Tela Deck (Meus Cards) substitui placeholder: lista de cards com rotação alternada, badges de status, contador, empty state e CTA fixo para treino.
+- Ação de apagar card com confirmação via long press/toque no item.
+- Fluxo de sessão de treino na aba Treinar:
+  - fila via `buildTrainingQueue`, até 10 cards;
+  - direção da pergunta alternada por card via lógica pura `assignQuestionDirections`;
+  - card com revelar resposta e animação de flip 3D;
+  - botões `ERREI`, `QUASE`, `ACERTEI` registram em `training_log`, aplicam `nextCardState`, atualizam XP/meta e avançam.
+- Tela de conclusão com celebração, XP total, acertos/quase/erros, palavras dominadas e meta diária batida.
+- Bottom sheet de primeira meta diária com opções 5/10/20 palavras.
+- Estados vazios: sem cards e todos dominados com revisão disponível.
+- Lógica pura em `src/logic/session.ts`: `assignQuestionDirections` e `summarizeSession`.
+
+### Verificação local
+
+- `npm run lint -- --fix`: ✅ passou.
+- `npx tsc --noEmit`: ✅ passou.
+- `npm test -- --runInBand`: ✅ passou (44 testes).
+
+### Observação
+
+- Lista do Deck usa `FlatList` nativa. `FlashList` fica como otimização futura se teste real com centenas de cards exigir.
+- Confetti implementado como celebração visual leve; animação/partículas reais podem ser refinadas no Sprint 6.
+- Validação manual em dispositivo físico, Maestro, 60fps no flip e teste de interrupção de sessão precisam ser feitos fora deste ambiente.

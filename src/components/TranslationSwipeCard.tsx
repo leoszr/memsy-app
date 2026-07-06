@@ -26,6 +26,7 @@ type Props = {
   result: TranslationResult;
   onSave(): void | Promise<void>;
   onDiscard(): void | Promise<void>;
+  onError?(error: unknown): void;
 };
 
 function lightHaptic() {
@@ -44,6 +45,7 @@ export function TranslationSwipeCard({
   result,
   onSave,
   onDiscard,
+  onError,
 }: Props) {
   const { width } = useWindowDimensions();
   const threshold = width * 0.4;
@@ -60,13 +62,13 @@ export function TranslationSwipeCard({
   }
 
   function decide(direction: 1 | -1) {
-    if (direction > 0) {
-      successHaptic();
-      void Promise.resolve(onSave()).catch(() => undefined);
-    } else {
-      lightHaptic();
-      void Promise.resolve(onDiscard()).catch(() => undefined);
-    }
+    const action = direction > 0 ? onSave : onDiscard;
+    if (direction > 0) successHaptic();
+    else lightHaptic();
+
+    void Promise.resolve()
+      .then(action)
+      .catch((error) => onError?.(error));
   }
 
   const fly = (direction: 1 | -1) => {

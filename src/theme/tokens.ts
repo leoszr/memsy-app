@@ -7,6 +7,7 @@ export const colors = {
   memsyGreen: '#05a77d',
   navyInk: '#1a1a2e',
   navyInkScrim: 'rgba(26, 26, 46, 0.35)',
+  navyInkOverlay: 'rgba(26, 26, 46, 0.25)',
   chalkWhite: '#fffdf5',
   bubbleGum: '#ffb3c6',
   mintPop: '#b8f0e0',

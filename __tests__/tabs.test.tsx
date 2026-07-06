@@ -67,8 +67,10 @@ describe('Sprint 0 tabs', () => {
   it('renders each initial tab screen without crashing', async () => {
     configureUiStore();
     expect((await render(<Add />)).getByText('Nova palavra ✦')).toBeTruthy();
-    expect((await render(<Cards />)).getByText('Meus Cards')).toBeTruthy();
-    expect((await render(<Train />)).getByText('Treinar')).toBeTruthy();
+    expect((await render(<Cards />)).getByText('Meus Cards ✦')).toBeTruthy();
+    expect(
+      (await render(<Train />)).getByText('Sem cards ainda ✦'),
+    ).toBeTruthy();
     expect((await render(<Progress />)).getByText('Progresso')).toBeTruthy();
   });
 });
