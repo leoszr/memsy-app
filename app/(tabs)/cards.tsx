@@ -1,15 +1,10 @@
 import { useMemo, useState } from 'react';
-import {
-  Alert,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { GameButton } from '../../src/components/GameButton';
+import { mediumHaptic } from '../../src/services/haptics';
 import { HardShadowBox } from '../../src/components/HardShadowBox';
+import { PressableWithFeedback } from '../../src/components/PressableWithFeedback';
 import { Card, CardStatus } from '../../src/logic/types';
 import { useMemsyStore } from '../../src/store/useMemsyStore';
 import { borders, colors, fonts, radii } from '../../src/theme/tokens';
@@ -78,10 +73,12 @@ export default function Cards() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
           renderItem={({ item, index }) => (
-            <Pressable
-              accessibilityRole="button"
+            <PressableWithFeedback
               accessibilityLabel={`Card ${item.word}. Toque para opções de apagar`}
-              onLongPress={() => remove(item)}
+              onLongPress={() => {
+                mediumHaptic();
+                remove(item);
+              }}
               onPress={() =>
                 setPendingDelete(pendingDelete === item.id ? null : item.id)
               }
@@ -131,7 +128,7 @@ export default function Cards() {
                   </GameButton>
                 )}
               </HardShadowBox>
-            </Pressable>
+            </PressableWithFeedback>
           )}
         />
       )}

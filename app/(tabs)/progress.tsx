@@ -1,7 +1,8 @@
 import { useEffect, useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { HardShadowBox } from '../../src/components/HardShadowBox';
+import { PressableWithFeedback } from '../../src/components/PressableWithFeedback';
 import {
   buildWeeklyBars,
   calculateProgressMetrics,
@@ -43,37 +44,47 @@ export default function Progress() {
 
   return (
     <ScrollView contentContainerStyle={styles.screen}>
-      <View style={styles.decorOne} />
-      <View style={styles.decorTwo} />
+      <View
+        importantForAccessibility="no-hide-descendants"
+        style={styles.decorOne}
+      />
+      <View
+        importantForAccessibility="no-hide-descendants"
+        style={styles.decorTwo}
+      />
       <View style={styles.header}>
         <View>
           <Text style={styles.eyebrow}>PROGRESSO</Text>
           <Text style={styles.title}>Você está evoluindo 🔥</Text>
         </View>
-        <Pressable
-          accessibilityRole="button"
+        <PressableWithFeedback
           accessibilityLabel="Abrir configurações"
           style={styles.settings}
           onPress={() => router.push('/settings')}
         >
           <Text style={styles.settingsText}>⚙</Text>
-        </Pressable>
+        </PressableWithFeedback>
       </View>
 
-      <HardShadowBox
-        backgroundColor={risk ? colors.lobster : colors.amberBlast}
-        offsetX={6}
-        offsetY={6}
-        contentStyle={styles.streakCard}
+      <View
+        accessible
+        accessibilityLabel={`Streak de ${streak} dias ${risk ? 'em risco' : 'seguidos'}`}
       >
-        <Text style={styles.fire}>🔥</Text>
-        <View style={styles.streakCopy}>
-          <Text style={styles.streakNumber}>{streak}</Text>
-          <Text style={styles.streakLabel}>
-            {risk ? 'Streak em risco!' : 'dias seguidos'}
-          </Text>
-        </View>
-      </HardShadowBox>
+        <HardShadowBox
+          backgroundColor={risk ? colors.lobster : colors.amberBlast}
+          offsetX={6}
+          offsetY={6}
+          contentStyle={styles.streakCard}
+        >
+          <Text style={styles.fire}>🔥</Text>
+          <View style={styles.streakCopy}>
+            <Text style={styles.streakNumber}>{streak}</Text>
+            <Text style={styles.streakLabel}>
+              {risk ? 'Streak em risco!' : 'dias seguidos'}
+            </Text>
+          </View>
+        </HardShadowBox>
+      </View>
 
       <View style={styles.goalWrap}>
         <View style={styles.goalHead}>
@@ -149,16 +160,22 @@ function Metric({
   color: string;
 }) {
   return (
-    <HardShadowBox
-      backgroundColor={color}
-      offsetX={4}
-      offsetY={4}
+    <View
+      accessible
+      accessibilityLabel={`${label}: ${value}`}
+      accessibilityRole="text"
       style={styles.metricBox}
-      contentStyle={styles.metric}
     >
-      <Text style={styles.metricValue}>{value}</Text>
-      <Text style={styles.metricLabel}>{label}</Text>
-    </HardShadowBox>
+      <HardShadowBox
+        backgroundColor={color}
+        offsetX={4}
+        offsetY={4}
+        contentStyle={styles.metric}
+      >
+        <Text style={styles.metricValue}>{value}</Text>
+        <Text style={styles.metricLabel}>{label}</Text>
+      </HardShadowBox>
+    </View>
   );
 }
 

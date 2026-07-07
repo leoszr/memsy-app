@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
 import Animated, {
@@ -11,6 +11,7 @@ import Animated, {
 import { GameButton } from '../../src/components/GameButton';
 import { HardShadowBox } from '../../src/components/HardShadowBox';
 import { LanguagePairPill } from '../../src/components/LanguagePairPill';
+import { PressableWithFeedback } from '../../src/components/PressableWithFeedback';
 import { TranslationSwipeCard } from '../../src/components/TranslationSwipeCard';
 import { findDuplicateCard } from '../../src/logic';
 import { getDefaultTranslationService } from '../../src/services/TranslationService';
@@ -117,7 +118,7 @@ export default function Add() {
           result={pending.result}
           onSave={savePending}
           onDiscard={discardPending}
-          onError={(error) =>
+          onError={(error: unknown) =>
             setToast(
               error instanceof Error
                 ? error.message
@@ -135,14 +136,13 @@ export default function Add() {
       <Decorations />
       <View style={styles.header}>
         <Text style={styles.logo}>memsy</Text>
-        <Pressable
-          accessibilityRole="button"
+        <PressableWithFeedback
           accessibilityLabel="Configurações"
           style={styles.settings}
           onPress={() => router.push('/settings')}
         >
           <Text style={styles.settingsText}>⚙</Text>
-        </Pressable>
+        </PressableWithFeedback>
       </View>
       <LanguagePairPill />
       <Text style={styles.title}>Nova palavra ✦</Text>
@@ -202,10 +202,26 @@ export default function Add() {
 function Decorations({ swipe }: { swipe?: boolean }) {
   return (
     <>
-      <View style={[styles.blobTop, swipe && styles.swipeDotTop]} />
-      <View style={[styles.blobBottom, swipe && styles.swipeDotBottom]} />
-      <Text style={[styles.spark, styles.sparkOne]}>✦</Text>
-      <Text style={[styles.spark, styles.sparkTwo]}>✦</Text>
+      <View
+        importantForAccessibility="no-hide-descendants"
+        style={[styles.blobTop, swipe && styles.swipeDotTop]}
+      />
+      <View
+        importantForAccessibility="no-hide-descendants"
+        style={[styles.blobBottom, swipe && styles.swipeDotBottom]}
+      />
+      <Text
+        importantForAccessibility="no"
+        style={[styles.spark, styles.sparkOne]}
+      >
+        ✦
+      </Text>
+      <Text
+        importantForAccessibility="no"
+        style={[styles.spark, styles.sparkTwo]}
+      >
+        ✦
+      </Text>
     </>
   );
 }
@@ -220,15 +236,14 @@ function ToolButton({
   soon?: boolean;
 }) {
   return (
-    <Pressable
-      accessibilityRole="button"
+    <PressableWithFeedback
       accessibilityLabel={label}
       onPress={onPress}
       style={styles.tool}
     >
       <Text style={styles.toolText}>{label}</Text>
       {soon && <Text style={styles.soon}>EM BREVE</Text>}
-    </Pressable>
+    </PressableWithFeedback>
   );
 }
 
@@ -244,13 +259,12 @@ function DuplicateBanner({ onView }: { onView(): void }) {
   return (
     <View style={styles.duplicate}>
       <Text style={styles.duplicateText}>Você já tem esse card!</Text>
-      <Pressable
-        accessibilityRole="button"
+      <PressableWithFeedback
         accessibilityLabel="Ver card existente"
         onPress={onView}
       >
         <Text style={styles.duplicateLink}>VER CARD</Text>
-      </Pressable>
+      </PressableWithFeedback>
     </View>
   );
 }

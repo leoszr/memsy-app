@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import Animated, {
   useAnimatedStyle,
@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { GameButton } from '../../src/components/GameButton';
 import { HardShadowBox } from '../../src/components/HardShadowBox';
+import { PressableWithFeedback } from '../../src/components/PressableWithFeedback';
 import {
   assignQuestionDirections,
   buildTrainingQueue,
@@ -15,6 +16,11 @@ import {
   summarizeSession,
 } from '../../src/logic';
 import { Card, TrainingResult } from '../../src/logic/types';
+import {
+  errorHaptic,
+  lightHaptic,
+  successHaptic,
+} from '../../src/services/haptics';
 import { syncDailyReminder } from '../../src/services/notifications';
 import { useMemsyStore } from '../../src/store/useMemsyStore';
 import { borders, colors, fonts, radii } from '../../src/theme/tokens';
@@ -100,10 +106,14 @@ export default function Train() {
   function reveal() {
     setRevealed(true);
     flip.value = withSpring(1, { damping: 14, stiffness: 120 });
+    lightHaptic();
   }
 
   async function answer(result: TrainingResult) {
     if (!current) return;
+    if (result === 'correct') successHaptic();
+    else if (result === 'wrong') errorHaptic();
+    else lightHaptic();
     const before = current.status;
     const predicted = nextCardState(current, result);
     await recordTrainingResult(current.id, result);
@@ -204,8 +214,7 @@ export default function Train() {
       <View style={styles.bar}>
         <View style={[styles.barFill, { width: `${progress}%` }]} />
       </View>
-      <Pressable
-        accessibilityRole="button"
+      <PressableWithFeedback
         accessibilityLabel="Revelar resposta"
         onPress={reveal}
       >
@@ -229,7 +238,7 @@ export default function Train() {
             </Text>
           </HardShadowBox>
         </Animated.View>
-      </Pressable>
+      </PressableWithFeedback>
       {revealed ? (
         <View style={styles.answers}>
           <AnswerButton label="ERREI" result="wrong" onPress={answer} />

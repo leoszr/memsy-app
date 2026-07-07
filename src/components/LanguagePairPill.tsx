@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text } from 'react-native';
 import { LANGUAGES, getLanguage } from '../logic/languages';
+import { PressableWithFeedback } from './PressableWithFeedback';
 import {
   parseLearningLanguages,
   setActiveLearningLanguage,
@@ -42,14 +43,13 @@ export function LanguagePairPill() {
         style={styles.pillWrap}
         contentStyle={styles.pillContent}
       >
-        <Pressable
-          accessibilityRole="button"
+        <PressableWithFeedback
           accessibilityLabel={label}
           onPress={() => setOpen(true)}
           style={styles.pillPressable}
         >
           <Text style={styles.pillText}>{label}</Text>
-        </Pressable>
+        </PressableWithFeedback>
       </HardShadowBox>
       <Modal
         visible={open}
@@ -61,9 +61,9 @@ export function LanguagePairPill() {
           <Pressable style={styles.sheet}>
             <Text style={styles.sheetTitle}>Trocar par ativo</Text>
             {choices.map((language) => (
-              <Pressable
-                accessibilityRole="button"
+              <PressableWithFeedback
                 key={language.code}
+                accessibilityLabel={`${language.name} → ${native.name}`}
                 onPress={() => choose(language.code)}
                 style={[
                   styles.choice,
@@ -76,7 +76,7 @@ export function LanguagePairPill() {
                 <Text style={styles.check}>
                   {language.code === activeCode ? '✓' : ''}
                 </Text>
-              </Pressable>
+              </PressableWithFeedback>
             ))}
             <GameButton
               onPress={() => setOpen(false)}

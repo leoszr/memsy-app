@@ -208,3 +208,54 @@ Status: ✅ Concluída
 
 - Teste real de notificação em dispositivo físico com horário +2 min ainda precisa ser feito fora deste ambiente.
 - Celebração de novo recorde de streak ficou registrada como dívida para polimento, porque exige persistir recorde exibido sem transformar streak em contador incrementado.
+
+## Sprint 6 — Polimento, resiliência e release (parcial)
+
+Status: 🔄 Em andamento
+
+### S6.1 — Microinterações
+
+- ✅ `PressableWithFeedback`: componente reutilizável com animação de escala (0.94x) no press-in. Usa `Animated.View` wrapper para não conflitar com `transform` do caller.
+- ✅ Todos os `Pressable` não-GameButton migrados para `PressableWithFeedback`:
+  - `ToolButton`, `DuplicateBanner`, settings gear (add)
+  - Lista de cards, delete com haptic Medium (cards)
+  - Quiz card reveal com haptic Light (train)
+  - Settings gear, back button, choices, language rows (progress, settings)
+  - Actions "SALVAR ✓"/"✗ FORA" (TranslationSwipeCard)
+  - Pill de idioma e choices do modal (LanguagePairPill)
+  - Audio button mantido como `Pressable` simples (evita conflito com pan gesture do swipe)
+- ✅ Haptics centralizados em `src/services/haptics.ts`: `lightHaptic`, `mediumHaptic`, `successHaptic`, `errorHaptic`.
+  - Onboarding: seleção de idioma (Light)
+  - Train: revelar card (Light), answer correct (Success), wrong (Error), almost (Light)
+  - Cards: long press delete (Medium)
+- ✅ Tab bar: animação `fade` entre abas + ícones emoji com tint color do React Navigation.
+
+### S6.2 — Estados de borda e resiliência
+
+- ✅ Chars especiais: `normalizeCardWord` usa `toLocaleLowerCase()` + `trim()`; acentos e apóstrofos preservados.
+- ✅ Empty states: todas as telas já cobertas (Sprints 2-5).
+- ✅ Error states: boot error com retry, toast em tradução/save, saveError no onboarding.
+- ✅ Loading states: ActivityIndicator no boot + hydrate; pulse no botão de tradução.
+
+### S6.3 — Acessibilidade
+
+- ✅ Tab bar: `tabBarAccessibilityLabel` em todas as 4 abas + ícones emoji.
+- ✅ Elementos decorativos marcados `importantForAccessibility="no"` / `"no-hide-descendants"` em add, progress, onboarding.
+- ✅ Métricas do progress: `accessible` + `accessibilityLabel` wrapper.
+- ✅ Streak card: `accessible` + `accessibilityLabel` wrapper.
+- ✅ Todos os botões com `accessibilityLabel` (GameButton, PressableWithFeedback).
+
+### S6.4 — Ícone, splash, identidade
+
+- ✅ Assets já existem: `icon.png` (1024×1024), `splash-icon.png` (1024×1024), favicon e Android adaptive.
+- ✅ `app.json`: `name: "Memsy"`, `version: "1.0.0"`, `scheme: "memsy"`.
+- ✅ Config de splash adicionada: `splash.image`, `backgroundColor: "#ecc30b"`, `imageWidth: 200`.
+
+### Pendente
+
+- S6.1: ícones emoji no tab bar podem precisar de ajuste de renderização em device real.
+- S6.4: ícone do app é placeholder do Expo; precisa de design customizado (card com borda/sombra dura, letra M).
+- S6.5: Build EAS + TestFlight + Sentry (requer device físico e contas externas).
+- S6.6: Beta com ≥3 usuários + formulário de feedback.
+- Contraste WCAG AA: verificar pares de cores nos 6 fundos em device real.
+- VoiceOver: validar fluxo swipe alternativo por botão em device iOS.

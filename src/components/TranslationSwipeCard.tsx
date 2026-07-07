@@ -15,8 +15,9 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
 import * as Speech from 'expo-speech';
+import { PressableWithFeedback } from './PressableWithFeedback';
+import { lightHaptic, successHaptic } from '../services/haptics';
 import { TranslationResult } from '../services/TranslationService.types';
 import { borders, colors, fonts, radii } from '../theme/tokens';
 
@@ -28,16 +29,6 @@ type Props = {
   onDiscard(): void | Promise<void>;
   onError?(error: unknown): void;
 };
-
-function lightHaptic() {
-  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
-}
-
-function successHaptic() {
-  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(
-    () => undefined,
-  );
-}
 
 export function TranslationSwipeCard({
   word,
@@ -126,20 +117,18 @@ export function TranslationSwipeCard({
   return (
     <View style={styles.root}>
       <View style={styles.actionsRow}>
-        <Pressable
-          accessibilityRole="button"
+        <PressableWithFeedback
           accessibilityLabel="Descartar card"
           onPress={() => fly(-1)}
         >
           <Text style={[styles.action, styles.outAction]}>✗ FORA</Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
+        </PressableWithFeedback>
+        <PressableWithFeedback
           accessibilityLabel="Salvar card"
           onPress={() => fly(1)}
         >
           <Text style={[styles.action, styles.saveAction]}>SALVAR ✓</Text>
-        </Pressable>
+        </PressableWithFeedback>
       </View>
       <GestureDetector gesture={pan}>
         <Animated.View

@@ -7,6 +7,11 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "backgroundColor": "#ecc30b",
+      "imageWidth": 200
+    },
     "ios": { "supportsTablet": true },
     "android": {
       "adaptiveIcon": {

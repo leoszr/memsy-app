@@ -9,6 +9,7 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GameButton } from '../src/components/GameButton';
 import { HardShadowBox } from '../src/components/HardShadowBox';
+import { lightHaptic } from '../src/services/haptics';
 import { LANGUAGES, Language } from '../src/logic/languages';
 import { useMemsyStore } from '../src/store/useMemsyStore';
 import { borders, colors, fonts, shadows } from '../src/theme/tokens';
@@ -26,13 +27,30 @@ function Decor({ light = false }: { light?: boolean }) {
   const color = light ? colors.chalkWhite : colors.navyInk;
   return (
     <>
-      <Text style={[styles.star, { top: 92, right: 24, color }]}>✦</Text>
-      <Text style={[styles.starSmall, { top: 200, left: 18, color }]}>✦</Text>
-      <Text style={[styles.star, { bottom: 168, right: 40, color }]}>✦</Text>
+      <Text
+        importantForAccessibility="no"
+        style={[styles.star, { top: 92, right: 24, color }]}
+      >
+        ✦
+      </Text>
+      <Text
+        importantForAccessibility="no"
+        style={[styles.starSmall, { top: 200, left: 18, color }]}
+      >
+        ✦
+      </Text>
+      <Text
+        importantForAccessibility="no"
+        style={[styles.star, { bottom: 168, right: 40, color }]}
+      >
+        ✦
+      </Text>
       <View
+        importantForAccessibility="no-hide-descendants"
         style={[styles.bubble, { top: 130, left: 60, backgroundColor: color }]}
       />
       <View
+        importantForAccessibility="no-hide-descendants"
         style={[styles.ring, { bottom: 130, left: -20, borderColor: color }]}
       />
     </>
@@ -131,6 +149,7 @@ export default function Onboarding() {
   );
 
   function toggleLearning(code: string) {
+    lightHaptic();
     setLearning((current) =>
       current.includes(code)
         ? current.filter((item) => item !== code)
@@ -175,7 +194,10 @@ export default function Onboarding() {
                 key={language.code}
                 language={language}
                 selected={native === language.code}
-                onPress={() => setNative(language.code)}
+                onPress={() => {
+                  lightHaptic();
+                  setNative(language.code);
+                }}
                 variant={1}
               />
             ))}

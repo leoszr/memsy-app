@@ -1,9 +1,10 @@
 import { type ReactNode } from 'react';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { GameButton } from '../src/components/GameButton';
 import { HardShadowBox } from '../src/components/HardShadowBox';
+import { PressableWithFeedback } from '../src/components/PressableWithFeedback';
 import {
   getLanguage,
   parseLearningLanguages,
@@ -97,13 +98,12 @@ export default function SettingsScreen() {
   return (
     <ScrollView contentContainerStyle={styles.screen}>
       <View style={styles.header}>
-        <Pressable
-          accessibilityRole="button"
+        <PressableWithFeedback
           accessibilityLabel="Voltar"
           onPress={() => router.back()}
         >
           <Text style={styles.back}>←</Text>
-        </Pressable>
+        </PressableWithFeedback>
         <Text style={styles.title}>Configurações ⚙</Text>
       </View>
 
@@ -149,8 +149,8 @@ export default function SettingsScreen() {
           const active = settings.activeLearningLanguage === code;
           return (
             <View key={code} style={styles.languageRow}>
-              <Pressable
-                accessibilityRole="button"
+              <PressableWithFeedback
+                accessibilityLabel={`${language?.name ?? code}. ${active ? 'Ativo' : ''}`}
                 onPress={() => chooseLanguage(code)}
                 style={styles.languageMain}
               >
@@ -158,14 +158,13 @@ export default function SettingsScreen() {
                   {language?.flag} {language?.name ?? code}
                 </Text>
                 {active && <Text style={styles.active}>ATIVO</Text>}
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
+              </PressableWithFeedback>
+              <PressableWithFeedback
                 accessibilityLabel={`Remover ${language?.name ?? code}`}
                 onPress={() => removeLanguage(code)}
               >
                 <Text style={styles.remove}>REMOVER</Text>
-              </Pressable>
+              </PressableWithFeedback>
             </View>
           );
         })}
@@ -208,14 +207,14 @@ function Choice({
   onPress(): void;
 }) {
   return (
-    <Pressable
-      accessibilityRole="button"
+    <PressableWithFeedback
+      accessibilityLabel={label}
       accessibilityState={{ selected: active }}
       onPress={onPress}
       style={[styles.choice, active && styles.choiceActive]}
     >
       <Text style={styles.choiceText}>{label}</Text>
-    </Pressable>
+    </PressableWithFeedback>
   );
 }
 
