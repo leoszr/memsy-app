@@ -183,6 +183,7 @@ export function TranslationSwipeCard({
           style={[styles.card, cardStyle]}
           testID="translation-card"
         >
+          <View style={styles.cardShadow} pointerEvents="none" />
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Ouvir pronúncia"
@@ -270,11 +271,15 @@ const styles = StyleSheet.create({
     borderColor: colors.navyInk,
     borderRadius: 24,
     backgroundColor: colors.chalkWhite,
-    shadowColor: colors.navyInk,
-    shadowOffset: { width: 6, height: 6 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 6,
+  },
+  cardShadow: {
+    position: 'absolute',
+    top: 6,
+    left: 6,
+    right: -6,
+    bottom: -6,
+    backgroundColor: colors.navyInk,
+    borderRadius: 24,
   },
   audio: {
     position: 'absolute',

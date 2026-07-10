@@ -48,9 +48,8 @@ export default function Cards() {
   return (
     <View style={[styles.screen, { paddingTop: insets.top + 14 }]}>
       <View style={styles.header}>
-        <Text style={styles.eyebrow}>DECK</Text>
         <Text style={styles.title} numberOfLines={2}>
-          Meus Cards ✦
+          MEUS CARDS 🃏
         </Text>
         <Text style={styles.count}>
           {counts.total} salvos · {counts.mastered} dominados
@@ -170,15 +169,14 @@ export default function Cards() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.sky,
+    backgroundColor: colors.bubbleGum,
     paddingHorizontal: 20,
   },
   header: { marginBottom: 14 },
-  eyebrow: { fontFamily: fonts.black, color: colors.navyInk, letterSpacing: 2 },
   title: {
     fontFamily: fonts.black,
     color: colors.navyInk,
-    fontSize: 34,
+    fontSize: 26,
     flexShrink: 1,
   },
   count: {

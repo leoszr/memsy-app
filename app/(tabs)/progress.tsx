@@ -12,7 +12,7 @@ import {
   isStreakAtRisk,
 } from '../../src/logic';
 import { useMemsyStore } from '../../src/store/useMemsyStore';
-import { borders, colors, fonts, radii, shadows } from '../../src/theme/tokens';
+import { borders, colors, fonts, radii } from '../../src/theme/tokens';
 
 export default function Progress() {
   const router = useRouter();
@@ -58,16 +58,22 @@ export default function Progress() {
       />
       <View style={styles.header}>
         <View>
-          <Text style={styles.eyebrow}>PROGRESSO</Text>
-          <Text style={styles.title}>Você está evoluindo 🔥</Text>
+          <Text style={styles.title}>PROGRESSO 📊</Text>
         </View>
-        <PressableWithFeedback
-          accessibilityLabel="Abrir configurações"
-          style={styles.settings}
-          onPress={() => router.push('/settings')}
+        <HardShadowBox
+          backgroundColor={colors.chalkWhite}
+          radius={radii.pill}
+          offsetX={2}
+          offsetY={2}
         >
-          <Text style={styles.settingsText}>⚙</Text>
-        </PressableWithFeedback>
+          <PressableWithFeedback
+            accessibilityLabel="Abrir configurações"
+            style={styles.settings}
+            onPress={() => router.push('/settings')}
+          >
+            <Text style={styles.settingsText}>⚙</Text>
+          </PressableWithFeedback>
+        </HardShadowBox>
       </View>
 
       <View
@@ -241,12 +247,11 @@ const styles = StyleSheet.create({
     opacity: 0.28,
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', gap: 14 },
-  eyebrow: { color: colors.navyInk, fontFamily: fonts.black, letterSpacing: 2 },
   title: {
     color: colors.navyInk,
     fontFamily: fonts.black,
-    fontSize: 32,
-    lineHeight: 34,
+    fontSize: 26,
+    lineHeight: 30,
     flexShrink: 1,
   },
   settings: {
@@ -254,17 +259,6 @@ const styles = StyleSheet.create({
     height: 44,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: borders.regular,
-    borderColor: colors.navyInk,
-    borderRadius: radii.pill,
-    backgroundColor: colors.chalkWhite,
-    shadowColor: colors.navyInk,
-    shadowOffset: {
-      width: shadows.hardPressed.x,
-      height: shadows.hardPressed.y,
-    },
-    shadowOpacity: 1,
-    shadowRadius: 0,
   },
   settingsText: { fontSize: 20 },
   streakCard: {

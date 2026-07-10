@@ -195,13 +195,20 @@ export default function Add() {
       <Decorations />
       <View style={styles.header}>
         <Text style={styles.logo}>memsy</Text>
-        <PressableWithFeedback
-          accessibilityLabel="Configurações"
-          style={styles.settings}
-          onPress={() => router.push('/settings')}
+        <HardShadowBox
+          backgroundColor={colors.chalkWhite}
+          radius={radii.pill}
+          offsetX={2}
+          offsetY={2}
         >
-          <Text style={styles.settingsText}>⚙</Text>
-        </PressableWithFeedback>
+          <PressableWithFeedback
+            accessibilityLabel="Configurações"
+            style={styles.settings}
+            onPress={() => router.push('/settings')}
+          >
+            <Text style={styles.settingsText}>⚙</Text>
+          </PressableWithFeedback>
+        </HardShadowBox>
       </View>
       <LanguagePairPill />
       <Text style={styles.title}>Nova palavra ✦</Text>
@@ -307,14 +314,22 @@ function ToolButton({
   soon?: boolean;
 }) {
   return (
-    <PressableWithFeedback
-      accessibilityLabel={label}
-      onPress={onPress}
-      style={styles.tool}
+    <HardShadowBox
+      backgroundColor={colors.chalkWhite}
+      radius={12}
+      offsetX={3}
+      offsetY={3}
+      contentStyle={styles.toolOuter}
     >
-      <Text style={styles.toolText}>{label}</Text>
-      {soon && <Text style={styles.soon}>EM BREVE</Text>}
-    </PressableWithFeedback>
+      <PressableWithFeedback
+        accessibilityLabel={label}
+        onPress={onPress}
+        style={styles.tool}
+      >
+        <Text style={styles.toolText}>{label}</Text>
+        {soon && <Text style={styles.soon}>EM BREVE</Text>}
+      </PressableWithFeedback>
+    </HardShadowBox>
   );
 }
 
@@ -417,14 +432,6 @@ const styles = StyleSheet.create({
     minHeight: 44,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: colors.navyInk,
-    borderRadius: radii.pill,
-    backgroundColor: colors.chalkWhite,
-    shadowColor: colors.navyInk,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
     paddingHorizontal: 10,
   },
   settingsText: { fontSize: 18 },
@@ -445,19 +452,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.chalkWhite,
   },
   tools: { flexDirection: 'row', gap: 12, marginTop: 18 },
+  toolOuter: { flex: 1 },
   tool: {
-    flex: 1,
     minHeight: 52,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: colors.navyInk,
-    borderRadius: 12,
-    backgroundColor: colors.chalkWhite,
-    shadowColor: colors.navyInk,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
     paddingHorizontal: 4,
   },
   toolText: { color: colors.navyInk, fontFamily: fonts.black, fontSize: 13 },

@@ -34,8 +34,8 @@ type AnswerLog = {
 };
 const resultColors: Record<TrainingResult, string> = {
   wrong: colors.lobster,
-  almost: colors.amberBlast,
-  correct: colors.memsyGreen,
+  almost: colors.coralFire,
+  correct: colors.amberBlast,
 };
 
 export default function Train() {
@@ -209,9 +209,8 @@ export default function Train() {
     return (
       <View style={[styles.screen, { paddingTop: insets.top + 14 }]}>
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>TREINO</Text>
           <Text style={styles.title}>
-            {allMastered ? 'Tudo dominado! 🏆' : 'Pronto para jogar?'}
+            {allMastered ? 'Tudo dominado! 🏆' : 'TREINO 🎯'}
           </Text>
           <Text style={styles.subtitle}>
             {allMastered
@@ -496,17 +495,15 @@ function GoalSheet({
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.mintPop,
-    paddingTop: 68,
+    backgroundColor: colors.memsyGreen,
     paddingHorizontal: 22,
     gap: 18,
   },
   header: { gap: 4 },
-  eyebrow: { fontFamily: fonts.black, color: colors.navyInk, letterSpacing: 2 },
   title: {
     fontFamily: fonts.black,
     color: colors.navyInk,
-    fontSize: 34,
+    fontSize: 26,
     flexShrink: 1,
   },
   subtitle: {

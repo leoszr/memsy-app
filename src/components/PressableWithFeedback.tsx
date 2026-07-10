@@ -45,7 +45,7 @@ export function PressableWithFeedback({
       onPress={onPress}
       onLongPress={onLongPress}
       onPressIn={() => {
-        scale.value = withTiming(0.94, {
+        scale.value = withTiming(0.96, {
           duration: 80,
           reduceMotion: ReduceMotion.System,
         });

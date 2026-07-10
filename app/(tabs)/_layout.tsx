@@ -1,10 +1,11 @@
 import { Tabs } from 'expo-router';
 import { Text } from 'react-native';
+import { TabBarPill } from '../../src/components/TabBarPill';
 import { colors, fonts } from '../../src/theme/tokens';
 
 function tabIcon(emoji: string) {
   return function TabIcon({ color }: { color: string }) {
-    return <Text style={{ fontSize: 22, color }}>{emoji}</Text>;
+    return <Text style={{ fontSize: 14, color }}>{emoji}</Text>;
   };
 }
 
@@ -14,14 +15,15 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         animation: 'fade',
-        tabBarActiveTintColor: colors.gameBlue,
-        tabBarInactiveTintColor: colors.navyInk,
         tabBarStyle: {
           backgroundColor: colors.chalkWhite,
           borderTopColor: colors.navyInk,
           borderTopWidth: 2.5,
+          height: 72,
+          paddingTop: 6,
         },
-        tabBarLabelStyle: { fontFamily: fonts.bold, fontSize: 12 },
+        tabBarLabelStyle: { fontFamily: fonts.bold, fontSize: 11 },
+        tabBarButton: (props) => <TabBarPill {...props} />,
       }}
     >
       <Tabs.Screen
@@ -36,7 +38,7 @@ export default function TabLayout() {
         name="cards"
         options={{
           title: 'Cards',
-          tabBarIcon: tabIcon('🂠'),
+          tabBarIcon: tabIcon('🃏'),
           tabBarAccessibilityLabel: 'Meus cards',
         }}
       />
@@ -44,7 +46,7 @@ export default function TabLayout() {
         name="train"
         options={{
           title: 'Treinar',
-          tabBarIcon: tabIcon('⚡'),
+          tabBarIcon: tabIcon('🎯'),
           tabBarAccessibilityLabel: 'Treinar',
         }}
       />
@@ -52,7 +54,7 @@ export default function TabLayout() {
         name="progress"
         options={{
           title: 'Progresso',
-          tabBarIcon: tabIcon('🔥'),
+          tabBarIcon: tabIcon('📊'),
           tabBarAccessibilityLabel: 'Progresso',
         }}
       />
