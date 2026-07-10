@@ -12,6 +12,10 @@ import { FakeDb } from './helpers/fakeDb';
 
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => ({ top: 47, bottom: 34, left: 0, right: 0 }),
+}));
+
 jest.mock('expo-notifications', () => ({
   SchedulableTriggerInputTypes: { DAILY: 'daily' },
   cancelScheduledNotificationAsync: jest.fn(),
@@ -75,23 +79,11 @@ describe('training flow', () => {
     const screen = await render(<Train />);
 
     fireEvent.press(screen.getByRole('button', { name: 'COMEÇAR TREINO →' }));
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'REVELAR ✦' })).toBeTruthy(),
-    );
     for (let i = 0; i < 3; i += 1) {
-      fireEvent.press(screen.getByRole('button', { name: 'REVELAR ✦' }));
-      await waitFor(() =>
-        expect(screen.getByRole('button', { name: 'ACERTEI' })).toBeTruthy(),
-      );
+      fireEvent.press(screen.getByRole('button', { name: 'Revelar resposta' }));
       await act(async () => {
         fireEvent.press(screen.getByRole('button', { name: 'ACERTEI' }));
       });
-      if (i < 2)
-        await waitFor(() =>
-          expect(
-            screen.getByRole('button', { name: 'REVELAR ✦' }),
-          ).toBeTruthy(),
-        );
     }
 
     await waitFor(() =>
@@ -110,13 +102,7 @@ describe('training flow', () => {
     const screen = await render(<Train />);
 
     fireEvent.press(screen.getByRole('button', { name: 'COMEÇAR TREINO →' }));
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'REVELAR ✦' })).toBeTruthy(),
-    );
-    fireEvent.press(screen.getByRole('button', { name: 'REVELAR ✦' }));
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'ACERTEI' })).toBeTruthy(),
-    );
+    fireEvent.press(screen.getByRole('button', { name: 'Revelar resposta' }));
 
     fireEvent.press(screen.getByRole('button', { name: 'ACERTEI' }));
     fireEvent.press(screen.getByRole('button', { name: 'ACERTEI' }));

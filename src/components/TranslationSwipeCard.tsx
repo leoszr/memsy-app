@@ -196,14 +196,28 @@ export function TranslationSwipeCard({
               <Text style={styles.badgeText}>{result.gramClass}</Text>
             </View>
           )}
-          <Text style={styles.word} adjustsFontSizeToFit numberOfLines={1}>
+          <Text
+            style={styles.word}
+            adjustsFontSizeToFit
+            minimumFontScale={0.5}
+            numberOfLines={2}
+          >
             {word}
           </Text>
           {!!result.phonetic && (
-            <Text style={styles.phonetic}>{result.phonetic}</Text>
+            <Text style={styles.phonetic} numberOfLines={2}>
+              {result.phonetic}
+            </Text>
           )}
           <View style={styles.divider} />
-          <Text style={styles.translation}>{result.translation}</Text>
+          <Text
+            style={styles.translation}
+            adjustsFontSizeToFit
+            minimumFontScale={0.6}
+            numberOfLines={3}
+          >
+            {result.translation}
+          </Text>
           <Animated.View
             pointerEvents="none"
             style={[styles.overlay, styles.saveOverlay, saveOverlayStyle]}
@@ -248,7 +262,7 @@ const styles = StyleSheet.create({
   saveAction: { color: colors.memsyGreen },
   card: {
     flex: 1,
-    minHeight: 380,
+    minHeight: 260,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 28,
@@ -297,6 +311,8 @@ const styles = StyleSheet.create({
     fontFamily: fonts.black,
     fontSize: 52,
     lineHeight: 58,
+    textAlign: 'center',
+    flexShrink: 1,
   },
   phonetic: {
     marginTop: 8,
@@ -304,6 +320,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     fontSize: 13,
     fontStyle: 'italic',
+    flexShrink: 1,
   },
   divider: {
     width: '70%',
@@ -317,6 +334,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.black,
     fontSize: 26,
     textAlign: 'center',
+    flexShrink: 1,
   },
   overlay: {
     position: 'absolute',

@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -123,7 +123,14 @@ function LanguageCard({
           style={styles.langCard}
         >
           <Text style={styles.flag}>{language.flag}</Text>
-          <Text style={styles.langName}>{language.name}</Text>
+          <Text
+            style={styles.langName}
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
+            numberOfLines={2}
+          >
+            {language.name}
+          </Text>
           <Text
             style={[styles.langCheck, variant === 1 && styles.langCheckBlue]}
           >
@@ -188,7 +195,11 @@ export default function Onboarding() {
           <Text style={styles.logoDark}>Memsy</Text>
           <Dots step={1} />
           <Text style={styles.titleDark}>Qual é a sua língua nativa?</Text>
-          <View style={styles.grid}>
+          <ScrollView
+            style={styles.grid}
+            contentContainerStyle={styles.gridContent}
+            showsVerticalScrollIndicator={false}
+          >
             {LANGUAGES.map((language) => (
               <LanguageCard
                 key={language.code}
@@ -201,7 +212,7 @@ export default function Onboarding() {
                 variant={1}
               />
             ))}
-          </View>
+          </ScrollView>
           <GameButton
             disabled={!native}
             onPress={() => setStep(2)}
@@ -222,7 +233,11 @@ export default function Onboarding() {
         <Dots step={2} />
         <Text style={styles.titleLight}>O que você quer aprender?</Text>
         <Text style={styles.subtitleLight}>Escolha um ou mais.</Text>
-        <View style={styles.grid}>
+        <ScrollView
+          style={styles.grid}
+          contentContainerStyle={styles.gridContent}
+          showsVerticalScrollIndicator={false}
+        >
           {learningOptions.map((language) => (
             <LanguageCard
               key={language.code}
@@ -232,7 +247,7 @@ export default function Onboarding() {
               variant={2}
             />
           ))}
-        </View>
+        </ScrollView>
         {saveError ? <Text style={styles.saveError}>{saveError}</Text> : null}
         <GameButton
           disabled={learning.length === 0 || saving}
@@ -255,7 +270,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 54,
     paddingBottom: 30,
   },
   logoDark: {
@@ -302,6 +316,7 @@ const styles = StyleSheet.create({
     fontSize: 26,
     lineHeight: 31,
     textAlign: 'center',
+    flexShrink: 1,
   },
   titleLight: {
     marginTop: 22,
@@ -310,6 +325,7 @@ const styles = StyleSheet.create({
     fontSize: 26,
     lineHeight: 31,
     textAlign: 'center',
+    flexShrink: 1,
   },
   subtitleLight: {
     marginTop: 6,
@@ -318,7 +334,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textAlign: 'center',
   },
-  grid: { marginTop: 24, flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
+  grid: { marginTop: 24, flex: 1 },
+  gridContent: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
   langWrap: { width: '47.5%' },
   langShadowContent: { borderWidth: borders.regular },
   langShadowContentSelected: { borderWidth: 3 },
@@ -335,6 +352,7 @@ const styles = StyleSheet.create({
     color: colors.navyInk,
     fontFamily: fonts.black,
     fontSize: 15,
+    flexShrink: 1,
   },
   langCheck: { color: colors.navyInk, fontFamily: fonts.black, fontSize: 16 },
   langCheckBlue: { color: colors.gameBlue },
@@ -349,6 +367,7 @@ const styles = StyleSheet.create({
     textShadowColor: colors.navyInk,
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 0,
+    flexShrink: 1,
   },
   star: {
     position: 'absolute',

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   ReduceMotion,
   useAnimatedStyle,
@@ -39,6 +40,7 @@ const resultColors: Record<TrainingResult, string> = {
 
 export default function Train() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const cards = useMemsyStore((state) => state.cards);
   const settings = useMemsyStore((state) => state.settings);
   const todayStats = useMemsyStore((state) => state.todayStats);
@@ -62,6 +64,7 @@ export default function Train() {
   );
   const questionOpacity = useSharedValue(1);
   const answerOpacity = useSharedValue(0);
+  const answersOpacity = useSharedValue(0.35);
   const revealingRef = useRef(false);
   const answeringRef = useRef(false);
 
@@ -72,7 +75,7 @@ export default function Train() {
     : 'front-to-back';
   const sessionXP = summarizeSession(answers).totalXP;
   const total = queue.length;
-  const progress = total ? (index / total) * 100 : 0;
+  const progress = total ? ((index + 1) / total) * 100 : 0;
   const allMastered =
     cards.length > 0 && cards.every((c) => c.status === 'mastered');
 
@@ -81,6 +84,9 @@ export default function Train() {
   }));
   const answerStyle = useAnimatedStyle(() => ({
     opacity: answerOpacity.value,
+  }));
+  const answersStyle = useAnimatedStyle(() => ({
+    opacity: answersOpacity.value,
   }));
 
   useEffect(() => {
@@ -107,6 +113,7 @@ export default function Train() {
     setRevealed(false);
     questionOpacity.value = 1;
     answerOpacity.value = 0;
+    answersOpacity.value = 0.35;
     revealingRef.current = false;
     answeringRef.current = false;
     setAnswering(false);
@@ -121,6 +128,10 @@ export default function Train() {
       reduceMotion: ReduceMotion.System,
     });
     answerOpacity.value = withTiming(1, {
+      duration: 180,
+      reduceMotion: ReduceMotion.System,
+    });
+    answersOpacity.value = withTiming(1, {
       duration: 180,
       reduceMotion: ReduceMotion.System,
     });
@@ -155,6 +166,7 @@ export default function Train() {
         setRevealed(false);
         questionOpacity.value = 1;
         answerOpacity.value = 0;
+        answersOpacity.value = 0.35;
         revealingRef.current = false;
       }
     } catch {
@@ -195,7 +207,7 @@ export default function Train() {
 
   if (!current) {
     return (
-      <View style={styles.screen}>
+      <View style={[styles.screen, { paddingTop: insets.top + 14 }]}>
         <View style={styles.header}>
           <Text style={styles.eyebrow}>TREINO</Text>
           <Text style={styles.title}>
@@ -239,7 +251,7 @@ export default function Train() {
     direction === 'front-to-back' ? current.translation : current.word;
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { paddingTop: insets.top + 14 }]}>
       <View style={styles.trainingHeader}>
         <Text style={styles.progressText}>
           {index + 1} / {total}
@@ -262,12 +274,26 @@ export default function Train() {
           >
             <Animated.View style={[styles.question, questionStyle]}>
               <Text style={styles.quizHint}>TOQUE PARA REVELAR</Text>
-              <Text style={styles.quizWord}>{prompt}</Text>
+              <Text
+                style={styles.quizWord}
+                adjustsFontSizeToFit
+                minimumFontScale={0.5}
+                numberOfLines={2}
+              >
+                {prompt}
+              </Text>
             </Animated.View>
             {revealed && (
               <Animated.View style={[styles.answer, answerStyle]}>
                 <Text style={styles.quizHint}>RESPOSTA</Text>
-                <Text style={styles.quizWord}>{answerText}</Text>
+                <Text
+                  style={styles.quizWord}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.5}
+                  numberOfLines={2}
+                >
+                  {answerText}
+                </Text>
               </Animated.View>
             )}
             <Text style={styles.quizSub}>
@@ -279,36 +305,29 @@ export default function Train() {
         </View>
       </PressableWithFeedback>
       {answerError && <Text style={styles.answerError}>{answerError}</Text>}
-      {revealed ? (
-        <View style={styles.answers}>
-          <AnswerButton
-            label="ERREI"
-            result="wrong"
-            disabled={answering}
-            onPress={answer}
-          />
-          <AnswerButton
-            label="QUASE"
-            result="almost"
-            disabled={answering}
-            onPress={answer}
-          />
-          <AnswerButton
-            label="ACERTEI"
-            result="correct"
-            disabled={answering}
-            onPress={answer}
-          />
-        </View>
-      ) : (
-        <GameButton
-          backgroundColor={colors.gameBlue}
-          color={colors.chalkWhite}
-          onPress={reveal}
-        >
-          REVELAR ✦
-        </GameButton>
-      )}
+      <Animated.View
+        pointerEvents={revealed ? 'auto' : 'none'}
+        style={[styles.answers, answersStyle]}
+      >
+        <AnswerButton
+          label="ERREI"
+          result="wrong"
+          disabled={answering || !revealed}
+          onPress={answer}
+        />
+        <AnswerButton
+          label="QUASE"
+          result="almost"
+          disabled={answering || !revealed}
+          onPress={answer}
+        />
+        <AnswerButton
+          label="ACERTEI"
+          result="correct"
+          disabled={answering || !revealed}
+          onPress={answer}
+        />
+      </Animated.View>
       {goalSheet && (
         <GoalSheet
           onChoose={chooseGoal}
@@ -355,9 +374,10 @@ function Completion({
   onMore(): void;
   onProgress(): void;
 }) {
+  const insets = useSafeAreaInsets();
   const summary = summarizeSession(answers);
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { paddingTop: insets.top + 14 }]}>
       <Text style={styles.confetti}>✦ 🎉 ✦</Text>
       <Text style={styles.title}>Sessão completa!</Text>
       <HardShadowBox
@@ -483,8 +503,18 @@ const styles = StyleSheet.create({
   },
   header: { gap: 4 },
   eyebrow: { fontFamily: fonts.black, color: colors.navyInk, letterSpacing: 2 },
-  title: { fontFamily: fonts.black, color: colors.navyInk, fontSize: 34 },
-  subtitle: { fontFamily: fonts.bold, color: colors.navyInk, fontSize: 17 },
+  title: {
+    fontFamily: fonts.black,
+    color: colors.navyInk,
+    fontSize: 34,
+    flexShrink: 1,
+  },
+  subtitle: {
+    fontFamily: fonts.bold,
+    color: colors.navyInk,
+    fontSize: 17,
+    flexShrink: 1,
+  },
   startCard: { padding: 22, alignItems: 'center', gap: 8 },
   startText: {
     fontFamily: fonts.bold,
@@ -544,8 +574,13 @@ const styles = StyleSheet.create({
     color: colors.navyInk,
     fontSize: 42,
     textAlign: 'center',
+    flexShrink: 1,
   },
-  quizSub: { fontFamily: fonts.bold, color: colors.navyInkMuted },
+  quizSub: {
+    fontFamily: fonts.bold,
+    color: colors.navyInkMuted,
+    flexShrink: 1,
+  },
   answerError: {
     color: colors.navyInk,
     fontFamily: fonts.black,
@@ -559,7 +594,9 @@ const styles = StyleSheet.create({
   },
   answers: { gap: 12 },
   answerButton: { minHeight: 54 },
-  answerText: { fontSize: 16 },
+  answerText: {
+    fontSize: 16,
+  },
   confetti: { fontSize: 42, textAlign: 'center', marginTop: 50 },
   finishCard: { padding: 22, gap: 10, alignItems: 'center' },
   finishXP: { fontFamily: fonts.black, color: colors.navyInk, fontSize: 52 },

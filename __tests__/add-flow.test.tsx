@@ -34,6 +34,10 @@ jest.mock('expo-haptics', () => ({
   NotificationFeedbackType: { Success: 'Success' },
 }));
 
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => ({ top: 47, bottom: 34, left: 0, right: 0 }),
+}));
+
 jest.mock('react-native-gesture-handler', () => {
   const { View } = require('react-native');
   const chain = {

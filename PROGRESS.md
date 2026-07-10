@@ -295,3 +295,23 @@ Status: 🔄 Implementado em código, pendente validação manual em iOS e Andro
 - `npm run lint`: ✅ passou.
 - `npm test -- --runInBand`: ✅ passou (51 testes).
 - `npx tsc --noEmit`: ✅ passou.
+
+## Auditoria UI/UX — Bloco 2 (implementação)
+
+Status: 🔄 Implementado em código, pendente validação manual em iOS e Android físicos.
+
+- UI-06: Indicador de sessão alinhado. Barra de progresso agora usa `(index + 1) / total`, igual ao texto `1 / N`.
+- UI-07: Adaptação responsiva em todas as telas:
+  - `useSafeAreaInsets()` substitui `paddingTop` fixo em Add, Cards, Train, Settings e Progress.
+  - `KeyboardAvoidingView` adicionado à tela Add para proteger o input do teclado.
+  - Grid de idiomas do onboarding agora é rolável via `ScrollView`.
+  - `minHeight: 310` removido do quizCard do treino; `minHeight: 380` reduzido para 260 no TranslationSwipeCard.
+- UI-08: Botões de resposta sempre visíveis com `opacity: 0.35` + `pointerEvents="none"` antes de revelar, com transição animada para `opacity: 1`. Botão "REVELAR ✦" removido — o card é o gatilho de revelação.
+- UI-09: Tratamento de textos longos: `numberOfLines`, `adjustsFontSizeToFit`, `minimumFontScale` e `flexShrink: 1` em palavras, traduções, badges, títulos e headers em todas as telas.
+- UI-10: `PressableWithFeedback` colapsado para um único `AnimatedPressable` sem wrapper extra. Layout em rows, ferramentas e configurações agora distribui espaço corretamente.
+
+### Verificação local
+
+- `npm run lint`: ✅ passou.
+- `npm test -- --runInBand`: ✅ passou (51 testes).
+- `npx tsc --noEmit`: ✅ passou.

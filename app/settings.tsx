@@ -2,6 +2,7 @@ import { type ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GameButton } from '../src/components/GameButton';
 import { GameToast } from '../src/components/GameToast';
 import { HardShadowBox } from '../src/components/HardShadowBox';
@@ -17,6 +18,7 @@ import { borders, colors, fonts, radii } from '../src/theme/tokens';
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const settings = useMemsyStore((state) => state.settings);
   const cards = useMemsyStore((state) => state.cards);
   const todayStats = useMemsyStore((state) => state.todayStats);
@@ -113,7 +115,9 @@ export default function SettingsScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.screen}>
+    <ScrollView
+      contentContainerStyle={[styles.screen, { paddingTop: insets.top + 14 }]}
+    >
       <View style={styles.header}>
         <PressableWithFeedback
           accessibilityLabel="Voltar"
@@ -248,7 +252,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     gap: 16,
     paddingHorizontal: 22,
-    paddingTop: 64,
     paddingBottom: 80,
     backgroundColor: colors.sky,
   },
@@ -260,12 +263,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   back: { color: colors.navyInk, fontFamily: fonts.black, fontSize: 36 },
-  title: { color: colors.navyInk, fontFamily: fonts.black, fontSize: 32 },
+  title: {
+    color: colors.navyInk,
+    fontFamily: fonts.black,
+    fontSize: 32,
+    flexShrink: 1,
+  },
   section: { gap: 12, padding: 18 },
   sectionTitle: {
     color: colors.navyInk,
     fontFamily: fonts.black,
     fontSize: 22,
+    flexShrink: 1,
   },
   rowWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   choice: {
@@ -285,7 +294,12 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '-1deg' }],
   },
   choiceText: { color: colors.navyInk, fontFamily: fonts.black, fontSize: 16 },
-  help: { color: colors.navyInk, fontFamily: fonts.bold, fontSize: 14 },
+  help: {
+    color: colors.navyInk,
+    fontFamily: fonts.bold,
+    fontSize: 14,
+    flexShrink: 1,
+  },
   languageRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -302,6 +316,7 @@ const styles = StyleSheet.create({
     color: colors.navyInk,
     fontFamily: fonts.black,
     fontSize: 16,
+    flexShrink: 1,
   },
   active: {
     marginTop: 2,
@@ -321,5 +336,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     fontSize: 15,
     lineHeight: 20,
+    flexShrink: 1,
   },
 });

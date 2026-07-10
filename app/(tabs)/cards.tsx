@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GameButton } from '../../src/components/GameButton';
 import { mediumHaptic } from '../../src/services/haptics';
 import { HardShadowBox } from '../../src/components/HardShadowBox';
@@ -22,6 +23,7 @@ const statusColor: Record<CardStatus, string> = {
 
 export default function Cards() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const cards = useMemsyStore((state) => state.cards);
   const discardCard = useMemsyStore((state) => state.discardCard);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
@@ -44,10 +46,12 @@ export default function Cards() {
   }
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { paddingTop: insets.top + 14 }]}>
       <View style={styles.header}>
         <Text style={styles.eyebrow}>DECK</Text>
-        <Text style={styles.title}>Meus Cards ✦</Text>
+        <Text style={styles.title} numberOfLines={2}>
+          Meus Cards ✦
+        </Text>
         <Text style={styles.count}>
           {counts.total} salvos · {counts.mastered} dominados
         </Text>
@@ -96,8 +100,17 @@ export default function Cards() {
               >
                 <View style={styles.cardTop}>
                   <View>
-                    <Text style={styles.word}>{item.word}</Text>
-                    <Text style={styles.translation}>{item.translation}</Text>
+                    <Text
+                      style={styles.word}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.6}
+                      numberOfLines={2}
+                    >
+                      {item.word}
+                    </Text>
+                    <Text style={styles.translation} numberOfLines={2}>
+                      {item.translation}
+                    </Text>
                   </View>
                   <View
                     style={[
@@ -105,7 +118,12 @@ export default function Cards() {
                       { backgroundColor: statusColor[item.status] },
                     ]}
                   >
-                    <Text style={styles.badgeText}>
+                    <Text
+                      style={styles.badgeText}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.7}
+                      numberOfLines={1}
+                    >
                       {statusLabel[item.status]}
                     </Text>
                   </View>
@@ -153,23 +171,38 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.sky,
-    paddingTop: 68,
     paddingHorizontal: 20,
   },
   header: { marginBottom: 14 },
   eyebrow: { fontFamily: fonts.black, color: colors.navyInk, letterSpacing: 2 },
-  title: { fontFamily: fonts.black, color: colors.navyInk, fontSize: 34 },
-  count: { fontFamily: fonts.bold, color: colors.navyInk, fontSize: 16 },
+  title: {
+    fontFamily: fonts.black,
+    color: colors.navyInk,
+    fontSize: 34,
+    flexShrink: 1,
+  },
+  count: {
+    fontFamily: fonts.bold,
+    color: colors.navyInk,
+    fontSize: 16,
+    flexShrink: 1,
+  },
   list: { paddingBottom: 124, gap: 16, paddingTop: 8 },
   cardWrap: { marginBottom: 16 },
   card: { padding: 16 },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
-  word: { fontFamily: fonts.black, color: colors.navyInk, fontSize: 27 },
+  word: {
+    fontFamily: fonts.black,
+    color: colors.navyInk,
+    fontSize: 27,
+    flexShrink: 1,
+  },
   translation: {
     fontFamily: fonts.bold,
     color: colors.memsyGreen,
     fontSize: 18,
     marginTop: 2,
+    flexShrink: 1,
   },
   meta: { marginTop: 12, fontFamily: fonts.bold, color: colors.navyInkMuted },
   badge: {
@@ -180,7 +213,11 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     alignSelf: 'flex-start',
   },
-  badgeText: { fontFamily: fonts.black, color: colors.navyInk, fontSize: 11 },
+  badgeText: {
+    fontFamily: fonts.black,
+    color: colors.navyInk,
+    fontSize: 11,
+  },
   details: {
     marginTop: 14,
     paddingTop: 12,

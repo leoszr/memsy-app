@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import Animated, {
   ReduceMotion,
@@ -25,6 +33,7 @@ type PendingTranslation = { word: string; result: TranslationResult };
 
 export default function Add() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const cards = useMemsyStore((state) => state.cards);
   const settings = useMemsyStore((state) => state.settings);
   const addCard = useMemsyStore((state) => state.addCard);
@@ -179,7 +188,10 @@ export default function Add() {
   }
 
   return (
-    <View style={styles.screen}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={[styles.screen, { paddingTop: insets.top + 20 }]}
+    >
       <Decorations />
       <View style={styles.header}>
         <Text style={styles.logo}>memsy</Text>
@@ -254,7 +266,7 @@ export default function Add() {
           onClose={() => setToast(null)}
         />
       )}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -325,7 +337,6 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 74,
     backgroundColor: colors.chalkWhite,
   },
   swipeScreen: {
@@ -423,6 +434,7 @@ const styles = StyleSheet.create({
     color: colors.navyInk,
     fontFamily: fonts.black,
     fontSize: 24,
+    flexShrink: 1,
   },
   input: {
     height: 60,

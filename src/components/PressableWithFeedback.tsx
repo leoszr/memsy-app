@@ -37,30 +37,28 @@ export function PressableWithFeedback({
   }));
 
   return (
-    <Animated.View style={animatedStyle}>
-      <AnimatedPressable
-        accessibilityRole={accessibilityRole}
-        accessibilityLabel={accessibilityLabel}
-        accessibilityState={accessibilityState}
-        disabled={disabled}
-        onPress={onPress}
-        onLongPress={onLongPress}
-        onPressIn={() => {
-          scale.value = withTiming(0.94, {
-            duration: 80,
-            reduceMotion: ReduceMotion.System,
-          });
-        }}
-        onPressOut={() => {
-          scale.value = withTiming(1, {
-            duration: 120,
-            reduceMotion: ReduceMotion.System,
-          });
-        }}
-        style={style}
-      >
-        {children}
-      </AnimatedPressable>
-    </Animated.View>
+    <AnimatedPressable
+      accessibilityRole={accessibilityRole}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={accessibilityState}
+      disabled={disabled}
+      onPress={onPress}
+      onLongPress={onLongPress}
+      onPressIn={() => {
+        scale.value = withTiming(0.94, {
+          duration: 80,
+          reduceMotion: ReduceMotion.System,
+        });
+      }}
+      onPressOut={() => {
+        scale.value = withTiming(1, {
+          duration: 120,
+          reduceMotion: ReduceMotion.System,
+        });
+      }}
+      style={[style, animatedStyle]}
+    >
+      {children}
+    </AnimatedPressable>
   );
 }

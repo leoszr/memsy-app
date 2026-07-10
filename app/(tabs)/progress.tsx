@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HardShadowBox } from '../../src/components/HardShadowBox';
 import { PressableWithFeedback } from '../../src/components/PressableWithFeedback';
 import {
@@ -15,6 +16,7 @@ import { borders, colors, fonts, radii, shadows } from '../../src/theme/tokens';
 
 export default function Progress() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const cards = useMemsyStore((state) => state.cards);
   const settings = useMemsyStore((state) => state.settings);
   const todayStats = useMemsyStore((state) => state.todayStats);
@@ -43,7 +45,9 @@ export default function Progress() {
   const maxBar = Math.max(1, ...weeklyBars.map((bar) => bar.cardsTrained));
 
   return (
-    <ScrollView contentContainerStyle={styles.screen}>
+    <ScrollView
+      contentContainerStyle={[styles.screen, { paddingTop: insets.top + 14 }]}
+    >
       <View
         importantForAccessibility="no-hide-descendants"
         style={styles.decorOne}
@@ -78,7 +82,14 @@ export default function Progress() {
         >
           <Text style={styles.fire}>🔥</Text>
           <View style={styles.streakCopy}>
-            <Text style={styles.streakNumber}>{streak}</Text>
+            <Text
+              style={styles.streakNumber}
+              adjustsFontSizeToFit
+              minimumFontScale={0.5}
+              numberOfLines={1}
+            >
+              {streak}
+            </Text>
             <Text style={styles.streakLabel}>
               {risk ? 'Streak em risco!' : 'dias seguidos'}
             </Text>
@@ -187,7 +198,14 @@ function Metric({
         offsetY={4}
         contentStyle={styles.metric}
       >
-        <Text style={styles.metricValue}>{value}</Text>
+        <Text
+          style={styles.metricValue}
+          adjustsFontSizeToFit
+          minimumFontScale={0.6}
+          numberOfLines={1}
+        >
+          {value}
+        </Text>
         <Text style={styles.metricLabel}>{label}</Text>
       </HardShadowBox>
     </View>
@@ -199,7 +217,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     gap: 18,
     paddingHorizontal: 22,
-    paddingTop: 68,
     paddingBottom: 120,
     backgroundColor: colors.coralFire,
   },
@@ -230,6 +247,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.black,
     fontSize: 32,
     lineHeight: 34,
+    flexShrink: 1,
   },
   settings: {
     width: 44,
@@ -293,8 +311,17 @@ const styles = StyleSheet.create({
   metricGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   metricBox: { width: '47%' },
   metric: { minHeight: 104, justifyContent: 'center', padding: 14 },
-  metricValue: { color: colors.navyInk, fontFamily: fonts.black, fontSize: 34 },
-  metricLabel: { color: colors.navyInk, fontFamily: fonts.bold, fontSize: 14 },
+  metricValue: {
+    color: colors.navyInk,
+    fontFamily: fonts.black,
+    fontSize: 34,
+  },
+  metricLabel: {
+    color: colors.navyInk,
+    fontFamily: fonts.bold,
+    fontSize: 14,
+    flexShrink: 1,
+  },
   weekCard: { padding: 18, gap: 14 },
   weekTitle: { color: colors.navyInk, fontFamily: fonts.black, fontSize: 22 },
   chart: {
