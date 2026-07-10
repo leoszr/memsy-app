@@ -144,4 +144,33 @@ describe('add capture flow', () => {
     expect(mockTranslate).not.toHaveBeenCalled();
     expect(db.cards).toHaveLength(1);
   });
+
+  it('keeps the card available and retries when SQLite save fails', async () => {
+    const { db, store } = setupStore();
+    const originalAddCard = store.getState().addCard;
+    const addCard = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('SQLite unavailable'))
+      .mockImplementation(originalAddCard);
+    store.setState({ addCard });
+    mockTranslate.mockResolvedValue({ translation: 'olá' });
+    const screen = await render(<Add />);
+
+    await fireEvent.changeText(screen.getByTestId('word-input'), 'bonjour');
+    await fireEvent.press(screen.getByRole('button', { name: 'TRADUZIR ✦' }));
+    await waitFor(() => expect(screen.getByText('olá')).toBeTruthy());
+    await fireEvent.press(screen.getByRole('button', { name: 'Salvar card' }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByText('Não consegui salvar o card. Ele continua aqui.'),
+      ).toBeTruthy(),
+    );
+    expect(screen.getByText('olá')).toBeTruthy();
+    await fireEvent.press(
+      screen.getByRole('button', { name: 'Tentar salvar novamente' }),
+    );
+    await waitFor(() => expect(db.cards).toHaveLength(1));
+    expect(addCard).toHaveBeenCalledTimes(2);
+  });
 });

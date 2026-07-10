@@ -259,3 +259,20 @@ Status: 🔄 Em andamento
 - S6.6: Beta com ≥3 usuários + formulário de feedback.
 - Contraste WCAG AA: verificar pares de cores nos 6 fundos em device real.
 - VoiceOver: validar fluxo swipe alternativo por botão em device iOS.
+
+## Auditoria UI/UX — Bloco 0 (implementação)
+
+Status: 🔄 Implementado em código, pendente validação manual em iOS e Android físicos.
+
+- UI-01: commit do swipe inicia junto da animação; falha restaura o card e mantém retry de salvamento visível.
+- UI-03: travas síncronas com `useRef` no swipe e treino; store rejeita persistências simultâneas equivalentes.
+- UI-02: remoção do `rotateY`; resposta do treino entra por crossfade no mesmo card.
+- UI-04: falha de tradução usa feedback persistente com `Tentar novamente` e `Fechar`, preservando texto e foco.
+- UI-22a: remoção de idioma exige confirmação explícita e explica que cards ficam ocultos.
+- UI-22b: cards do Deck abrem detalhes por toque; exclusão é secundária e mantém confirmação nativa.
+
+### Verificação local
+
+- `npm run lint`: ✅ passou.
+- `npm test -- --runInBand`: ✅ passou (51 testes).
+- `npx tsc --noEmit`: ✅ passou.

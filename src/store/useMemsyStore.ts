@@ -36,6 +36,9 @@ export type MemsyState = {
 const today = () => getLocalDate();
 
 export function createMemsyStore(repos: Repositories) {
+  const cardsBeingCreated = new Set<string>();
+  const trainingBeingRecorded = new Set<string>();
+
   return createStore<MemsyState>((set, get) => ({
     cards: [],
     settings: {},
@@ -75,9 +78,22 @@ export function createMemsyStore(repos: Repositories) {
       set({ dailyStats, todayStats, resultCounts });
     },
     async addCard(input) {
-      const card = await repos.cards.create(input);
-      set({ cards: [card, ...get().cards] });
-      return card;
+      const key = [
+        input.word.trim().toLocaleLowerCase(),
+        input.langFrom,
+        input.langTo,
+      ].join(':');
+      if (cardsBeingCreated.has(key))
+        throw new Error('Este card já está sendo salvo.');
+
+      cardsBeingCreated.add(key);
+      try {
+        const card = await repos.cards.create(input);
+        set({ cards: [card, ...get().cards] });
+        return card;
+      } finally {
+        cardsBeingCreated.delete(key);
+      }
     },
     async saveCard(card) {
       await repos.cards.update(card);
@@ -92,31 +108,38 @@ export function createMemsyStore(repos: Repositories) {
       result,
       trainedAt = new Date().toISOString(),
     ) {
-      const existing =
-        get().cards.find((c) => c.id === cardId) ??
-        (await repos.cards.getById(cardId));
-      if (!existing) throw new Error(`Card not found: ${cardId}`);
-      const updated = nextCardState(existing, result, trainedAt);
-      const dailyGoal = Number(get().settings.dailyGoal ?? 10);
-      await repos.cards.update(updated);
-      await repos.training.log(cardId, result, trainedAt);
-      const todayStats = await repos.training.recalculateDailyStat(
-        trainedAt,
-        dailyGoal,
-      );
-      const xp = await repos.training.calculateTotalXP();
-      const [dailyStats, resultCounts] = await Promise.all([
-        repos.training.getDailyStats(),
-        repos.training.getResultCounts(),
-      ]);
-      await repos.settings.set('xp', String(xp));
-      set({
-        cards: get().cards.map((c) => (c.id === cardId ? updated : c)),
-        todayStats,
-        dailyStats,
-        resultCounts,
-        settings: { ...get().settings, xp: String(xp) },
-      });
+      if (trainingBeingRecorded.has(cardId))
+        throw new Error('Esta resposta já está sendo registrada.');
+      trainingBeingRecorded.add(cardId);
+      try {
+        const existing =
+          get().cards.find((c) => c.id === cardId) ??
+          (await repos.cards.getById(cardId));
+        if (!existing) throw new Error(`Card not found: ${cardId}`);
+        const updated = nextCardState(existing, result, trainedAt);
+        const dailyGoal = Number(get().settings.dailyGoal ?? 10);
+        await repos.cards.update(updated);
+        await repos.training.log(cardId, result, trainedAt);
+        const todayStats = await repos.training.recalculateDailyStat(
+          trainedAt,
+          dailyGoal,
+        );
+        const xp = await repos.training.calculateTotalXP();
+        const [dailyStats, resultCounts] = await Promise.all([
+          repos.training.getDailyStats(),
+          repos.training.getResultCounts(),
+        ]);
+        await repos.settings.set('xp', String(xp));
+        set({
+          cards: get().cards.map((c) => (c.id === cardId ? updated : c)),
+          todayStats,
+          dailyStats,
+          resultCounts,
+          settings: { ...get().settings, xp: String(xp) },
+        });
+      } finally {
+        trainingBeingRecorded.delete(cardId);
+      }
     },
     async updateSettings(settings) {
       await repos.settings.setMany(settings);

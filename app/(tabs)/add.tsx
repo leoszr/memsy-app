@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
 import Animated, {
@@ -20,6 +20,12 @@ import { useMemsyStore } from '../../src/store/useMemsyStore';
 import { borders, colors, fonts, radii, shadows } from '../../src/theme/tokens';
 
 type PendingTranslation = { word: string; result: TranslationResult };
+type ToastState = {
+  message: string;
+  actionLabel?: string;
+  onAction?: () => void;
+  persistent?: boolean;
+};
 
 export default function Add() {
   const router = useRouter();
@@ -30,7 +36,10 @@ export default function Add() {
   const [focused, setFocused] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pending, setPending] = useState<PendingTranslation | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const inputRef = useRef<TextInput>(null);
+  const wordRef = useRef(word);
+  wordRef.current = word;
   const pulse = useSharedValue(1);
 
   const langFrom =
@@ -44,7 +53,7 @@ export default function Add() {
   }, [loading, pulse]);
 
   useEffect(() => {
-    if (!toast) return;
+    if (!toast || toast.persistent) return;
     const timer = setTimeout(() => setToast(null), 3000);
     return () => clearTimeout(timer);
   }, [toast]);
@@ -56,11 +65,11 @@ export default function Add() {
   );
 
   async function translate() {
-    const cleanWord = word.trim();
+    const cleanWord = wordRef.current.trim();
     if (!cleanWord || loading) return;
     const found = findDuplicateCard(cards, cleanWord, langFrom, langTo);
     if (found) {
-      setToast('Você já tem esse card!');
+      setToast({ message: 'Você já tem esse card!' });
       return;
     }
     setLoading(true);
@@ -69,10 +78,20 @@ export default function Add() {
       const service = await getDefaultTranslationService();
       const result = await service.translate(cleanWord, langFrom, langTo);
       setPending({ word: cleanWord, result });
-    } catch (error) {
-      setToast(
-        error instanceof Error ? error.message : 'Não consegui traduzir.',
-      );
+    } catch {
+      setToast({
+        message:
+          'Não consegui traduzir agora. Confira a conexão e tente novamente.',
+        actionLabel: 'Tentar novamente',
+        onAction: () => {
+          setToast(null);
+          inputRef.current?.focus();
+          void translate();
+        },
+        persistent: true,
+      });
+      inputRef.current?.focus();
+      setWord(wordRef.current);
     } finally {
       setLoading(false);
     }
@@ -84,28 +103,41 @@ export default function Add() {
   }
 
   async function savePending() {
-    if (!pending) return;
-    try {
-      await addCard({
-        word: pending.word,
-        translation: pending.result.translation,
-        phonetic: pending.result.phonetic,
-        gramClass: pending.result.gramClass,
-        langFrom,
-        langTo,
-      });
+    if (!pending) throw new Error('Card pendente não encontrado.');
+    await addCard({
+      word: pending.word,
+      translation: pending.result.translation,
+      phonetic: pending.result.phonetic,
+      gramClass: pending.result.gramClass,
+      langFrom,
+      langTo,
+    });
+  }
+
+  function completeDecision(direction: 1 | -1) {
+    if (direction > 0) {
       setWord('');
-      setPending(null);
-      setToast('Card salvo! ✦');
-    } catch (error) {
-      setToast(
-        error instanceof Error ? error.message : 'Não consegui salvar o card.',
-      );
+      setToast({ message: 'Card salvo! ✦' });
+    }
+    setPending(null);
+  }
+
+  async function retrySave() {
+    try {
+      await savePending();
+      completeDecision(1);
+    } catch {
+      setToast({
+        message: 'Ainda não consegui salvar. Tente novamente.',
+        actionLabel: 'Tentar salvar novamente',
+        onAction: () => void retrySave(),
+        persistent: true,
+      });
     }
   }
 
   function discardPending() {
-    setPending(null);
+    // The card stays mounted until its exit animation has completed.
   }
 
   if (pending) {
@@ -118,15 +150,17 @@ export default function Add() {
           result={pending.result}
           onSave={savePending}
           onDiscard={discardPending}
-          onError={(error: unknown) =>
-            setToast(
-              error instanceof Error
-                ? error.message
-                : 'Não consegui salvar o card.',
-            )
+          onDecisionComplete={completeDecision}
+          onError={() =>
+            setToast({
+              message: 'Não consegui salvar o card. Ele continua aqui.',
+              actionLabel: 'Tentar salvar novamente',
+              onAction: () => void retrySave(),
+              persistent: true,
+            })
           }
         />
-        {toast && <Toast message={toast} />}
+        {toast && <Toast {...toast} onClose={() => setToast(null)} />}
       </View>
     );
   }
@@ -153,6 +187,7 @@ export default function Add() {
         offsetY={4}
       >
         <TextInput
+          ref={inputRef}
           accessibilityLabel="Palavra para traduzir"
           testID="word-input"
           autoCapitalize="none"
@@ -185,16 +220,16 @@ export default function Add() {
         <ToolButton
           label="📷 Câmera"
           soon
-          onPress={() => setToast('Câmera EM BREVE ✦')}
+          onPress={() => setToast({ message: 'Câmera EM BREVE ✦' })}
         />
         <ToolButton
           label="🎤 Voz"
           soon
-          onPress={() => setToast('Voz EM BREVE ✦')}
+          onPress={() => setToast({ message: 'Voz EM BREVE ✦' })}
         />
         <ToolButton label="📋 Colar" onPress={paste} />
       </View>
-      {toast && <Toast message={toast} />}
+      {toast && <Toast {...toast} onClose={() => setToast(null)} />}
     </View>
   );
 }
@@ -247,10 +282,25 @@ function ToolButton({
   );
 }
 
-function Toast({ message }: { message: string }) {
+function Toast({
+  message,
+  actionLabel,
+  onAction,
+  onClose,
+}: ToastState & { onClose(): void }) {
   return (
     <View style={styles.toast} testID="toast">
       <Text style={styles.toastText}>{message}</Text>
+      <View style={styles.toastActions}>
+        {!!actionLabel && onAction && (
+          <Pressable accessibilityRole="button" onPress={onAction}>
+            <Text style={styles.toastAction}>{actionLabel}</Text>
+          </Pressable>
+        )}
+        <Pressable accessibilityRole="button" onPress={onClose}>
+          <Text style={styles.toastAction}>Fechar</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -422,6 +472,18 @@ const styles = StyleSheet.create({
     fontFamily: fonts.black,
     fontSize: 14,
     textAlign: 'center',
+  },
+  toastActions: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 18,
+    marginTop: 10,
+  },
+  toastAction: {
+    color: colors.navyInk,
+    fontFamily: fonts.black,
+    fontSize: 13,
+    textDecorationLine: 'underline',
   },
   duplicate: {
     flexDirection: 'row',

@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 import { GameButton } from '../../src/components/GameButton';
 import { HardShadowBox } from '../../src/components/HardShadowBox';
@@ -54,10 +54,15 @@ export default function Train() {
   const [answers, setAnswers] = useState<AnswerLog[]>([]);
   const [finished, setFinished] = useState(false);
   const [reminderSynced, setReminderSynced] = useState(false);
+  const [answering, setAnswering] = useState(false);
+  const [answerError, setAnswerError] = useState<string | null>(null);
   const [goalSheet, setGoalSheet] = useState(
     !settings.dailyGoal && cards.length > 0,
   );
-  const flip = useSharedValue(0);
+  const questionOpacity = useSharedValue(1);
+  const answerOpacity = useSharedValue(0);
+  const revealingRef = useRef(false);
+  const answeringRef = useRef(false);
 
   const availableQueue = useMemo(() => buildTrainingQueue(cards, 10), [cards]);
   const current = queue[index];
@@ -70,12 +75,11 @@ export default function Train() {
   const allMastered =
     cards.length > 0 && cards.every((c) => c.status === 'mastered');
 
-  const cardStyle = useAnimatedStyle(() => ({
-    transform: [
-      { perspective: 900 },
-      { rotateY: `${flip.value * 180}deg` },
-      { scale: revealed ? 1.02 : 1 },
-    ],
+  const questionStyle = useAnimatedStyle(() => ({
+    opacity: questionOpacity.value,
+  }));
+  const answerStyle = useAnimatedStyle(() => ({
+    opacity: answerOpacity.value,
   }));
 
   useEffect(() => {
@@ -100,38 +104,57 @@ export default function Train() {
     setFinished(false);
     setReminderSynced(false);
     setRevealed(false);
-    flip.value = 0;
+    questionOpacity.value = 1;
+    answerOpacity.value = 0;
+    revealingRef.current = false;
+    answeringRef.current = false;
+    setAnswering(false);
   }
 
   function reveal() {
+    if (revealed || revealingRef.current || answeringRef.current) return;
+    revealingRef.current = true;
     setRevealed(true);
-    flip.value = withSpring(1, { damping: 14, stiffness: 120 });
+    questionOpacity.value = withTiming(0, { duration: 100 });
+    answerOpacity.value = withTiming(1, { duration: 180 });
     lightHaptic();
   }
 
   async function answer(result: TrainingResult) {
-    if (!current) return;
+    if (!current || !revealed || answeringRef.current) return;
+    answeringRef.current = true;
+    setAnswering(true);
     if (result === 'correct') successHaptic();
     else if (result === 'wrong') errorHaptic();
     else lightHaptic();
     const before = current.status;
     const predicted = nextCardState(current, result);
-    await recordTrainingResult(current.id, result);
-    setAnswers((prev) => [
-      ...prev,
-      {
-        card: current,
-        result,
-        becameMastered:
-          before !== 'mastered' && predicted.status === 'mastered',
-      },
-    ]);
-    const nextIndex = index + 1;
-    if (nextIndex >= total) setFinished(true);
-    else {
-      setIndex(nextIndex);
-      setRevealed(false);
-      flip.value = withSpring(0, { damping: 14, stiffness: 120 });
+    setAnswerError(null);
+    try {
+      await recordTrainingResult(current.id, result);
+      setAnswers((prev) => [
+        ...prev,
+        {
+          card: current,
+          result,
+          becameMastered:
+            before !== 'mastered' && predicted.status === 'mastered',
+        },
+      ]);
+      const nextIndex = index + 1;
+      if (nextIndex >= total) setFinished(true);
+      else {
+        setIndex(nextIndex);
+        setRevealed(false);
+        questionOpacity.value = 1;
+        answerOpacity.value = 0;
+        revealingRef.current = false;
+      }
+    } catch {
+      setAnswerError('Não consegui salvar sua resposta. Tente novamente.');
+    } finally {
+      answeringRef.current = false;
+      setAnswering(false);
     }
   }
 
@@ -218,32 +241,52 @@ export default function Train() {
         accessibilityLabel="Revelar resposta"
         onPress={reveal}
       >
-        <Animated.View style={[styles.flipWrap, cardStyle]}>
+        <View style={styles.flipWrap}>
           <HardShadowBox
             backgroundColor={colors.chalkWhite}
             offsetX={6}
             offsetY={6}
             contentStyle={styles.quizCard}
           >
-            <Text style={styles.quizHint}>
-              {revealed ? 'RESPOSTA' : 'TOQUE PARA VIRAR'}
-            </Text>
-            <Text style={styles.quizWord}>
-              {revealed ? answerText : prompt}
-            </Text>
+            <Animated.View style={[styles.question, questionStyle]}>
+              <Text style={styles.quizHint}>TOQUE PARA REVELAR</Text>
+              <Text style={styles.quizWord}>{prompt}</Text>
+            </Animated.View>
+            {revealed && (
+              <Animated.View style={[styles.answer, answerStyle]}>
+                <Text style={styles.quizHint}>RESPOSTA</Text>
+                <Text style={styles.quizWord}>{answerText}</Text>
+              </Animated.View>
+            )}
             <Text style={styles.quizSub}>
               {direction === 'front-to-back'
                 ? 'palavra → tradução'
                 : 'tradução → palavra'}
             </Text>
           </HardShadowBox>
-        </Animated.View>
+        </View>
       </PressableWithFeedback>
+      {answerError && <Text style={styles.answerError}>{answerError}</Text>}
       {revealed ? (
         <View style={styles.answers}>
-          <AnswerButton label="ERREI" result="wrong" onPress={answer} />
-          <AnswerButton label="QUASE" result="almost" onPress={answer} />
-          <AnswerButton label="ACERTEI" result="correct" onPress={answer} />
+          <AnswerButton
+            label="ERREI"
+            result="wrong"
+            disabled={answering}
+            onPress={answer}
+          />
+          <AnswerButton
+            label="QUASE"
+            result="almost"
+            disabled={answering}
+            onPress={answer}
+          />
+          <AnswerButton
+            label="ACERTEI"
+            result="correct"
+            disabled={answering}
+            onPress={answer}
+          />
         </View>
       ) : (
         <GameButton
@@ -262,16 +305,19 @@ export default function Train() {
 function AnswerButton({
   label,
   result,
+  disabled,
   onPress,
 }: {
   label: string;
   result: TrainingResult;
+  disabled: boolean;
   onPress(result: TrainingResult): void;
 }) {
   return (
     <GameButton
       backgroundColor={resultColors[result]}
-      color={colors.chalkWhite}
+      color={colors.navyInk}
+      disabled={disabled}
       style={styles.answerButton}
       textStyle={styles.answerText}
       onPress={() => onPress(result)}
@@ -439,6 +485,14 @@ const styles = StyleSheet.create({
     padding: 24,
     gap: 14,
   },
+  question: { alignItems: 'center', gap: 14 },
+  answer: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 14,
+    padding: 24,
+  },
   quizHint: {
     fontFamily: fonts.black,
     color: colors.coralFire,
@@ -451,6 +505,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   quizSub: { fontFamily: fonts.bold, color: colors.navyInkScrim },
+  answerError: {
+    color: colors.navyInk,
+    fontFamily: fonts.black,
+    fontSize: 14,
+    textAlign: 'center',
+    backgroundColor: colors.amberBlast,
+    padding: 10,
+    borderWidth: borders.regular,
+    borderColor: colors.navyInk,
+    borderRadius: radii.md,
+  },
   answers: { gap: 12 },
   answerButton: { minHeight: 54 },
   answerText: { fontSize: 16 },

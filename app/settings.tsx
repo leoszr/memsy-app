@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { GameButton } from '../src/components/GameButton';
 import { HardShadowBox } from '../src/components/HardShadowBox';
@@ -95,6 +95,22 @@ export default function SettingsScreen() {
     );
   }
 
+  function confirmRemoveLanguage(code: string) {
+    const language = getLanguage(code)?.name ?? code;
+    Alert.alert(
+      `Remover ${language}?`,
+      'Os cards desse idioma ficarão ocultos. Eles não serão apagados.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Remover idioma',
+          style: 'destructive',
+          onPress: () => void removeLanguage(code),
+        },
+      ],
+    );
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.screen}>
       <View style={styles.header}>
@@ -161,7 +177,7 @@ export default function SettingsScreen() {
               </PressableWithFeedback>
               <PressableWithFeedback
                 accessibilityLabel={`Remover ${language?.name ?? code}`}
-                onPress={() => removeLanguage(code)}
+                onPress={() => confirmRemoveLanguage(code)}
               >
                 <Text style={styles.remove}>REMOVER</Text>
               </PressableWithFeedback>

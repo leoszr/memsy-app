@@ -103,4 +103,23 @@ describe('training flow', () => {
       goal_met: 1,
     });
   });
+
+  it('records only one result for two answer taps in the same frame', async () => {
+    const { db } = await setupStore();
+    const screen = await render(<Train />);
+
+    fireEvent.press(screen.getByRole('button', { name: 'COMEÇAR TREINO →' }));
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'REVELAR ✦' })).toBeTruthy(),
+    );
+    fireEvent.press(screen.getByRole('button', { name: 'REVELAR ✦' }));
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'ACERTEI' })).toBeTruthy(),
+    );
+
+    fireEvent.press(screen.getByRole('button', { name: 'ACERTEI' }));
+    fireEvent.press(screen.getByRole('button', { name: 'ACERTEI' }));
+
+    await waitFor(() => expect(db.trainingLog).toHaveLength(1));
+  });
 });

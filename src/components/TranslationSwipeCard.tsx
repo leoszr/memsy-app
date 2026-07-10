@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -27,6 +27,7 @@ type Props = {
   result: TranslationResult;
   onSave(): void | Promise<void>;
   onDiscard(): void | Promise<void>;
+  onDecisionComplete(direction: 1 | -1): void;
   onError?(error: unknown): void;
 };
 
@@ -36,6 +37,7 @@ export function TranslationSwipeCard({
   result,
   onSave,
   onDiscard,
+  onDecisionComplete,
   onError,
 }: Props) {
   const { width } = useWindowDimensions();
@@ -43,6 +45,9 @@ export function TranslationSwipeCard({
   const translateX = useSharedValue(0);
   const popped = useSharedValue(0);
   const crossed = useSharedValue(false);
+  const deciding = useSharedValue(false);
+  const decisionRef = useRef(false);
+  const [isDeciding, setIsDeciding] = useState(false);
 
   useEffect(() => {
     popped.value = withSpring(1, { damping: 10, stiffness: 130 });
@@ -52,36 +57,64 @@ export function TranslationSwipeCard({
     Speech.speak(word, { language: langFrom });
   }
 
-  function decide(direction: 1 | -1) {
-    const action = direction > 0 ? onSave : onDiscard;
-    if (direction > 0) successHaptic();
-    else lightHaptic();
-
-    void Promise.resolve()
-      .then(action)
-      .catch((error) => onError?.(error));
+  function resetAfterFailure(error: unknown) {
+    decisionRef.current = false;
+    deciding.value = false;
+    setIsDeciding(false);
+    crossed.value = false;
+    translateX.value = withSpring(0, { damping: 10, stiffness: 120 });
+    onError?.(error);
   }
 
-  const fly = (direction: 1 | -1) => {
+  function decide(direction: 1 | -1) {
+    if (decisionRef.current) return;
+    decisionRef.current = true;
+    deciding.value = true;
+    setIsDeciding(true);
+
+    const action = direction > 0 ? onSave : onDiscard;
+    if (direction < 0) lightHaptic();
+
+    // SQLite starts at the same instant as the exit animation. The parent only
+    // clears the pending card after both have finished.
+    let resolveAnimation: (() => void) | undefined;
+    const animation = new Promise<void>((resolve) => {
+      resolveAnimation = resolve;
+    });
+    let persistence: Promise<void>;
+    try {
+      persistence = Promise.resolve(action());
+    } catch (error) {
+      resetAfterFailure(error);
+      return;
+    }
     translateX.value = withTiming(
       direction * width * 1.3,
       { duration: 260 },
       () => {
-        runOnJS(decide)(direction);
+        if (resolveAnimation) runOnJS(resolveAnimation)();
       },
     );
-  };
+    void Promise.all([animation, persistence])
+      .then(() => {
+        if (direction > 0) successHaptic();
+        onDecisionComplete(direction);
+      })
+      .catch(resetAfterFailure);
+  }
 
   const pan = Gesture.Pan()
     .onUpdate((event) => {
+      if (deciding.value) return;
       translateX.value = event.translationX;
       const isCrossed = Math.abs(event.translationX) >= threshold;
       if (isCrossed && !crossed.value) runOnJS(lightHaptic)();
       crossed.value = isCrossed;
     })
     .onEnd(() => {
-      if (translateX.value > threshold) fly(1);
-      else if (translateX.value < -threshold) fly(-1);
+      if (deciding.value) return;
+      if (translateX.value > threshold) runOnJS(decide)(1);
+      else if (translateX.value < -threshold) runOnJS(decide)(-1);
       else {
         crossed.value = false;
         translateX.value = withSpring(0, { damping: 10, stiffness: 120 });
@@ -119,13 +152,17 @@ export function TranslationSwipeCard({
       <View style={styles.actionsRow}>
         <PressableWithFeedback
           accessibilityLabel="Descartar card"
-          onPress={() => fly(-1)}
+          accessibilityState={{ disabled: isDeciding }}
+          disabled={isDeciding}
+          onPress={() => decide(-1)}
         >
           <Text style={[styles.action, styles.outAction]}>✗ FORA</Text>
         </PressableWithFeedback>
         <PressableWithFeedback
           accessibilityLabel="Salvar card"
-          onPress={() => fly(1)}
+          accessibilityState={{ disabled: isDeciding }}
+          disabled={isDeciding}
+          onPress={() => decide(1)}
         >
           <Text style={[styles.action, styles.saveAction]}>SALVAR ✓</Text>
         </PressableWithFeedback>

@@ -74,11 +74,7 @@ export default function Cards() {
           contentContainerStyle={styles.list}
           renderItem={({ item, index }) => (
             <PressableWithFeedback
-              accessibilityLabel={`Card ${item.word}. Toque para opções de apagar`}
-              onLongPress={() => {
-                mediumHaptic();
-                remove(item);
-              }}
+              accessibilityLabel={`Card ${item.word}. Toque para abrir detalhes`}
               onPress={() =>
                 setPendingDelete(pendingDelete === item.id ? null : item.id)
               }
@@ -118,14 +114,20 @@ export default function Cards() {
                   {item.timesTrained} treinos · streak {item.correctStreak}/3
                 </Text>
                 {pendingDelete === item.id && (
-                  <GameButton
-                    backgroundColor={colors.lobster}
-                    color={colors.chalkWhite}
-                    style={styles.deleteButton}
-                    onPress={() => remove(item)}
-                  >
-                    APAGAR CARD
-                  </GameButton>
+                  <View style={styles.details}>
+                    <Text style={styles.detailsText}>
+                      {item.correctStreak}/3 acertos seguidos
+                    </Text>
+                    <PressableWithFeedback
+                      accessibilityLabel={`Apagar ${item.word}`}
+                      onPress={() => {
+                        mediumHaptic();
+                        void remove(item);
+                      }}
+                    >
+                      <Text style={styles.deleteLink}>APAGAR CARD</Text>
+                    </PressableWithFeedback>
+                  </View>
                 )}
               </HardShadowBox>
             </PressableWithFeedback>
@@ -179,7 +181,15 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   badgeText: { fontFamily: fonts.black, color: colors.navyInk, fontSize: 11 },
-  deleteButton: { marginTop: 14 },
+  details: {
+    marginTop: 14,
+    paddingTop: 12,
+    borderTopWidth: borders.hairline,
+    borderColor: colors.navyInk,
+    gap: 10,
+  },
+  detailsText: { color: colors.navyInk, fontFamily: fonts.bold, fontSize: 14 },
+  deleteLink: { color: colors.lobster, fontFamily: fonts.black, fontSize: 13 },
   cta: { position: 'absolute', left: 20, right: 20, bottom: 96 },
   empty: { flex: 1, justifyContent: 'center', gap: 12, paddingBottom: 80 },
   emptyIcon: { fontSize: 54, textAlign: 'center' },

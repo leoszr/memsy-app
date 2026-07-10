@@ -97,6 +97,27 @@ describe('store integration', () => {
     expect(store.getState().settings.xp).toBe('10');
   });
 
+  it('rejects simultaneous saves for the same card', async () => {
+    const { db, store } = setup();
+    const input = {
+      word: 'bonjour',
+      translation: 'olá',
+      langFrom: 'fr',
+      langTo: 'pt',
+    };
+
+    const results = await Promise.allSettled([
+      store.getState().addCard(input),
+      store.getState().addCard(input),
+    ]);
+
+    expect(results.map((result) => result.status)).toEqual([
+      'fulfilled',
+      'rejected',
+    ]);
+    expect(db.cards).toHaveLength(1);
+  });
+
   it('full flow masters card in database after three correct answers', async () => {
     const { db, store } = setup();
     await store.getState().updateSettings({ dailyGoal: '3' });
