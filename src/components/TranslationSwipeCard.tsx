@@ -9,6 +9,7 @@ import {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   interpolate,
+  ReduceMotion,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
@@ -62,7 +63,11 @@ export function TranslationSwipeCard({
     deciding.value = false;
     setIsDeciding(false);
     crossed.value = false;
-    translateX.value = withSpring(0, { damping: 10, stiffness: 120 });
+    translateX.value = withSpring(0, {
+      damping: 10,
+      stiffness: 120,
+      reduceMotion: ReduceMotion.System,
+    });
     onError?.(error);
   }
 
@@ -117,7 +122,11 @@ export function TranslationSwipeCard({
       else if (translateX.value < -threshold) runOnJS(decide)(-1);
       else {
         crossed.value = false;
-        translateX.value = withSpring(0, { damping: 10, stiffness: 120 });
+        translateX.value = withSpring(0, {
+          damping: 10,
+          stiffness: 120,
+          reduceMotion: ReduceMotion.System,
+        });
       }
     });
 
@@ -154,6 +163,7 @@ export function TranslationSwipeCard({
           accessibilityLabel="Descartar card"
           accessibilityState={{ disabled: isDeciding }}
           disabled={isDeciding}
+          style={styles.actionButton}
           onPress={() => decide(-1)}
         >
           <Text style={[styles.action, styles.outAction]}>✗ FORA</Text>
@@ -162,6 +172,7 @@ export function TranslationSwipeCard({
           accessibilityLabel="Salvar card"
           accessibilityState={{ disabled: isDeciding }}
           disabled={isDeciding}
+          style={styles.actionButton}
           onPress={() => decide(1)}
         >
           <Text style={[styles.action, styles.saveAction]}>SALVAR ✓</Text>
@@ -219,6 +230,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 18,
+  },
+  actionButton: {
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   action: {
     fontFamily: fonts.black,
@@ -283,11 +300,10 @@ const styles = StyleSheet.create({
   },
   phonetic: {
     marginTop: 8,
-    color: colors.navyInk,
+    color: colors.navyInkMuted,
     fontFamily: fonts.regular,
     fontSize: 13,
     fontStyle: 'italic',
-    opacity: 0.55,
   },
   divider: {
     width: '70%',

@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
 import Animated, {
+  ReduceMotion,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
 import { GameButton } from '../../src/components/GameButton';
+import { GameToast } from '../../src/components/GameToast';
 import { HardShadowBox } from '../../src/components/HardShadowBox';
 import { LanguagePairPill } from '../../src/components/LanguagePairPill';
 import { PressableWithFeedback } from '../../src/components/PressableWithFeedback';
@@ -17,15 +19,9 @@ import { findDuplicateCard } from '../../src/logic';
 import { getDefaultTranslationService } from '../../src/services/TranslationService';
 import { TranslationResult } from '../../src/services/TranslationService.types';
 import { useMemsyStore } from '../../src/store/useMemsyStore';
-import { borders, colors, fonts, radii, shadows } from '../../src/theme/tokens';
+import { colors, fonts, radii } from '../../src/theme/tokens';
 
 type PendingTranslation = { word: string; result: TranslationResult };
-type ToastState = {
-  message: string;
-  actionLabel?: string;
-  onAction?: () => void;
-  persistent?: boolean;
-};
 
 export default function Add() {
   const router = useRouter();
@@ -36,7 +32,12 @@ export default function Add() {
   const [focused, setFocused] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pending, setPending] = useState<PendingTranslation | null>(null);
-  const [toast, setToast] = useState<ToastState | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    actionLabel?: string;
+    onAction?: () => void;
+    persistent?: boolean;
+  } | null>(null);
   const inputRef = useRef<TextInput>(null);
   const wordRef = useRef(word);
   wordRef.current = word;
@@ -48,15 +49,17 @@ export default function Add() {
 
   useEffect(() => {
     if (loading)
-      pulse.value = withRepeat(withTiming(0.55, { duration: 450 }), -1, true);
-    else pulse.value = withTiming(1, { duration: 120 });
+      pulse.value = withRepeat(
+        withTiming(0.55, { duration: 450, reduceMotion: ReduceMotion.System }),
+        -1,
+        true,
+      );
+    else
+      pulse.value = withTiming(1, {
+        duration: 120,
+        reduceMotion: ReduceMotion.System,
+      });
   }, [loading, pulse]);
-
-  useEffect(() => {
-    if (!toast || toast.persistent) return;
-    const timer = setTimeout(() => setToast(null), 3000);
-    return () => clearTimeout(timer);
-  }, [toast]);
 
   const buttonPulse = useAnimatedStyle(() => ({ opacity: pulse.value }));
   const duplicate = useMemo(
@@ -91,7 +94,6 @@ export default function Add() {
         persistent: true,
       });
       inputRef.current?.focus();
-      setWord(wordRef.current);
     } finally {
       setLoading(false);
     }
@@ -160,7 +162,18 @@ export default function Add() {
             })
           }
         />
-        {toast && <Toast {...toast} onClose={() => setToast(null)} />}
+        {toast && (
+          <GameToast
+            message={toast.message}
+            action={
+              toast.actionLabel && toast.onAction
+                ? { label: toast.actionLabel, onPress: toast.onAction }
+                : undefined
+            }
+            persistent={toast.persistent}
+            onClose={() => setToast(null)}
+          />
+        )}
       </View>
     );
   }
@@ -196,7 +209,7 @@ export default function Add() {
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           placeholder="bonjour..."
-          placeholderTextColor={colors.navyInkScrim}
+          placeholderTextColor={colors.navyInkMuted}
           style={styles.input}
           returnKeyType="done"
           onSubmitEditing={translate}
@@ -229,7 +242,18 @@ export default function Add() {
         />
         <ToolButton label="📋 Colar" onPress={paste} />
       </View>
-      {toast && <Toast {...toast} onClose={() => setToast(null)} />}
+      {toast && (
+        <GameToast
+          message={toast.message}
+          action={
+            toast.actionLabel && toast.onAction
+              ? { label: toast.actionLabel, onPress: toast.onAction }
+              : undefined
+          }
+          persistent={toast.persistent}
+          onClose={() => setToast(null)}
+        />
+      )}
     </View>
   );
 }
@@ -282,29 +306,6 @@ function ToolButton({
   );
 }
 
-function Toast({
-  message,
-  actionLabel,
-  onAction,
-  onClose,
-}: ToastState & { onClose(): void }) {
-  return (
-    <View style={styles.toast} testID="toast">
-      <Text style={styles.toastText}>{message}</Text>
-      <View style={styles.toastActions}>
-        {!!actionLabel && onAction && (
-          <Pressable accessibilityRole="button" onPress={onAction}>
-            <Text style={styles.toastAction}>{actionLabel}</Text>
-          </Pressable>
-        )}
-        <Pressable accessibilityRole="button" onPress={onClose}>
-          <Text style={styles.toastAction}>Fechar</Text>
-        </Pressable>
-      </View>
-    </View>
-  );
-}
-
 function DuplicateBanner({ onView }: { onView(): void }) {
   return (
     <View style={styles.duplicate}>
@@ -312,8 +313,9 @@ function DuplicateBanner({ onView }: { onView(): void }) {
       <PressableWithFeedback
         accessibilityLabel="Ver card existente"
         onPress={onView}
+        style={styles.duplicateLink}
       >
-        <Text style={styles.duplicateLink}>VER CARD</Text>
+        <Text style={styles.duplicateLinkText}>VER CARD</Text>
       </PressableWithFeedback>
     </View>
   );
@@ -400,8 +402,8 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '-1.5deg' }],
   },
   settings: {
-    width: 40,
-    height: 40,
+    minWidth: 44,
+    minHeight: 44,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
@@ -412,6 +414,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 0,
+    paddingHorizontal: 10,
   },
   settingsText: { fontSize: 18 },
   title: {
@@ -452,39 +455,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.black,
     fontSize: 8,
   },
-  toast: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 110,
-    padding: 14,
-    borderWidth: borders.regular,
-    borderColor: colors.navyInk,
-    borderRadius: radii.md,
-    backgroundColor: colors.amberBlast,
-    shadowColor: colors.navyInk,
-    shadowOffset: { width: shadows.hard.x, height: shadows.hard.y },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-  },
-  toastText: {
-    color: colors.navyInk,
-    fontFamily: fonts.black,
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  toastActions: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 18,
-    marginTop: 10,
-  },
-  toastAction: {
-    color: colors.navyInk,
-    fontFamily: fonts.black,
-    fontSize: 13,
-    textDecorationLine: 'underline',
-  },
   duplicate: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -503,8 +473,14 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   duplicateLink: {
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  duplicateLinkText: {
     color: colors.gameBlue,
     fontFamily: fonts.black,
-    fontSize: 12,
+    fontSize: 13,
   },
 });

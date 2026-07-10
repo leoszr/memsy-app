@@ -27,6 +27,7 @@ jest.mock('react-native-reanimated', () => {
       View,
       createAnimatedComponent: (component: unknown) => component,
     },
+    ReduceMotion: { System: 'system' },
     useSharedValue: (value: unknown) => ({ value }),
     useAnimatedStyle: (factory: () => unknown) => factory(),
     withSpring: (value: unknown) => value,

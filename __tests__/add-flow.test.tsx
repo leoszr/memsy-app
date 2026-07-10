@@ -57,6 +57,7 @@ jest.mock('react-native-reanimated', () => {
       View,
       createAnimatedComponent: (component: unknown) => component,
     },
+    ReduceMotion: { System: 'system' },
     interpolate: (_value: number, _input: number[], output: number[]) =>
       output[0],
     runOnJS: (fn: (...args: unknown[]) => unknown) => fn,

@@ -55,9 +55,18 @@ export function LanguagePairPill() {
         visible={open}
         transparent
         animationType="slide"
+        accessibilityViewIsModal
         onRequestClose={() => setOpen(false)}
+        onShow={() => {
+          // Focus will naturally land on the first interactive element
+        }}
       >
-        <Pressable style={styles.scrim} onPress={() => setOpen(false)}>
+        <Pressable
+          style={styles.scrim}
+          accessibilityLabel="Fechar seletor de idiomas"
+          accessibilityRole="button"
+          onPress={() => setOpen(false)}
+        >
           <Pressable style={styles.sheet}>
             <Text style={styles.sheetTitle}>Trocar par ativo</Text>
             {choices.map((language) => (
@@ -95,7 +104,12 @@ export function LanguagePairPill() {
 const styles = StyleSheet.create({
   pillWrap: { alignSelf: 'center', marginTop: 22 },
   pillContent: { borderWidth: 2 },
-  pillPressable: { paddingVertical: 8, paddingHorizontal: 18 },
+  pillPressable: {
+    minHeight: 44,
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+  },
   pillText: { color: colors.navyInk, fontFamily: fonts.bold, fontSize: 14 },
   scrim: {
     flex: 1,

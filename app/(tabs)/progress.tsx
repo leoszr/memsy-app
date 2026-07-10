@@ -93,7 +93,16 @@ export default function Progress() {
             {metrics.trainedToday} / {dailyGoal} hoje
           </Text>
         </View>
-        <View style={styles.goalBar}>
+        <View
+          accessibilityRole="progressbar"
+          accessibilityValue={{
+            min: 0,
+            max: dailyGoal,
+            now: metrics.trainedToday,
+          }}
+          accessibilityLabel={`Meta diária: ${metrics.trainedToday} de ${dailyGoal} palavras treinadas hoje`}
+          style={styles.goalBar}
+        >
           <View style={[styles.goalFill, { width: `${goalProgress}%` }]} />
         </View>
       </View>
@@ -128,7 +137,12 @@ export default function Progress() {
         <Text style={styles.weekTitle}>Últimos 7 dias</Text>
         <View style={styles.chart}>
           {weeklyBars.map((bar) => (
-            <View key={bar.date} style={styles.barColumn}>
+            <View
+              key={bar.date}
+              style={styles.barColumn}
+              accessible
+              accessibilityLabel={`${bar.label}${bar.isToday ? ', hoje' : ''}, ${bar.cardsTrained} cards`}
+            >
               <View
                 style={[
                   styles.weekBar,
@@ -142,6 +156,7 @@ export default function Progress() {
               />
               <Text style={styles.barValue}>{bar.cardsTrained}</Text>
               <Text style={styles.barLabel}>{bar.label}</Text>
+              {bar.isToday && <Text style={styles.todayMarker}>hoje</Text>}
             </View>
           ))}
         </View>
@@ -297,4 +312,10 @@ const styles = StyleSheet.create({
   },
   barValue: { color: colors.navyInk, fontFamily: fonts.black, fontSize: 12 },
   barLabel: { color: colors.navyInk, fontFamily: fonts.bold, fontSize: 11 },
+  todayMarker: {
+    color: colors.gameBlue,
+    fontFamily: fonts.black,
+    fontSize: 9,
+    marginTop: 1,
+  },
 });

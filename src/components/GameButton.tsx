@@ -9,6 +9,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import Animated, {
+  ReduceMotion,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -56,10 +57,16 @@ export function GameButton({
         disabled={disabled}
         onPress={onPress}
         onPressIn={() => {
-          pressed.value = withTiming(1, { duration: 80 });
+          pressed.value = withTiming(1, {
+            duration: 80,
+            reduceMotion: ReduceMotion.System,
+          });
         }}
         onPressOut={() => {
-          pressed.value = withTiming(0, { duration: 110 });
+          pressed.value = withTiming(0, {
+            duration: 110,
+            reduceMotion: ReduceMotion.System,
+          });
         }}
         testID={testID}
         style={[

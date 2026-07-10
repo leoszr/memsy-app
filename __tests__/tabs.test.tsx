@@ -8,6 +8,7 @@ jest.mock('react-native-reanimated', () => ({
     View: require('react-native').View,
     createAnimatedComponent: (component: unknown) => component,
   },
+  ReduceMotion: { System: 'system' },
   useSharedValue: (value: unknown) => ({ value }),
   useAnimatedStyle: (factory: () => unknown) => factory(),
   withRepeat: (value: unknown) => value,

@@ -74,7 +74,7 @@ export default function Cards() {
           contentContainerStyle={styles.list}
           renderItem={({ item, index }) => (
             <PressableWithFeedback
-              accessibilityLabel={`Card ${item.word}. Toque para abrir detalhes`}
+              accessibilityLabel={`${item.word}, tradução ${item.translation}, status ${statusLabel[item.status]}, ${item.correctStreak} de 3 acertos seguidos. Toque para abrir detalhes`}
               onPress={() =>
                 setPendingDelete(pendingDelete === item.id ? null : item.id)
               }
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginTop: 2,
   },
-  meta: { marginTop: 12, fontFamily: fonts.bold, color: colors.navyInkScrim },
+  meta: { marginTop: 12, fontFamily: fonts.bold, color: colors.navyInkMuted },
   badge: {
     borderWidth: borders.regular,
     borderColor: colors.navyInk,

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import Animated, {
+  ReduceMotion,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -115,8 +116,14 @@ export default function Train() {
     if (revealed || revealingRef.current || answeringRef.current) return;
     revealingRef.current = true;
     setRevealed(true);
-    questionOpacity.value = withTiming(0, { duration: 100 });
-    answerOpacity.value = withTiming(1, { duration: 180 });
+    questionOpacity.value = withTiming(0, {
+      duration: 100,
+      reduceMotion: ReduceMotion.System,
+    });
+    answerOpacity.value = withTiming(1, {
+      duration: 180,
+      reduceMotion: ReduceMotion.System,
+    });
     lightHaptic();
   }
 
@@ -216,7 +223,12 @@ export default function Train() {
         >
           COMEÇAR TREINO →
         </GameButton>
-        {goalSheet && <GoalSheet onChoose={chooseGoal} />}
+        {goalSheet && (
+          <GoalSheet
+            onChoose={chooseGoal}
+            onDismiss={() => setGoalSheet(false)}
+          />
+        )}
       </View>
     );
   }
@@ -297,7 +309,12 @@ export default function Train() {
           REVELAR ✦
         </GameButton>
       )}
-      {goalSheet && <GoalSheet onChoose={chooseGoal} />}
+      {goalSheet && (
+        <GoalSheet
+          onChoose={chooseGoal}
+          onDismiss={() => setGoalSheet(false)}
+        />
+      )}
     </View>
   );
 }
@@ -406,29 +423,53 @@ function Empty({
   );
 }
 
-function GoalSheet({ onChoose }: { onChoose(goal: number): void }) {
+function GoalSheet({
+  onChoose,
+  onDismiss,
+}: {
+  onChoose(goal: number): void;
+  onDismiss(): void;
+}) {
+  function handleChoose(goal: number) {
+    onChoose(goal);
+  }
+
   return (
-    <View style={styles.sheetBackdrop}>
-      <HardShadowBox
-        backgroundColor={colors.chalkWhite}
-        contentStyle={styles.sheet}
+    <Modal
+      transparent
+      animationType="fade"
+      accessibilityViewIsModal
+      onRequestClose={onDismiss}
+    >
+      <Pressable
+        style={styles.sheetBackdrop}
+        accessibilityLabel="Fechar"
+        accessibilityRole="button"
+        onPress={onDismiss}
       >
-        <Text style={styles.sheetTitle}>Meta diária?</Text>
-        <Text style={styles.sheetText}>
-          Escolha quantas palavras quer treinar por dia.
-        </Text>
-        {[5, 10, 20].map((goal) => (
-          <GameButton
-            key={goal}
-            backgroundColor={colors.amberBlast}
-            color={colors.navyInk}
-            onPress={() => onChoose(goal)}
+        <Pressable onPress={() => {}}>
+          <HardShadowBox
+            backgroundColor={colors.chalkWhite}
+            contentStyle={styles.sheet}
           >
-            {goal} PALAVRAS
-          </GameButton>
-        ))}
-      </HardShadowBox>
-    </View>
+            <Text style={styles.sheetTitle}>Meta diária?</Text>
+            <Text style={styles.sheetText}>
+              Escolha quantas palavras quer treinar por dia.
+            </Text>
+            {[5, 10, 20].map((goal) => (
+              <GameButton
+                key={goal}
+                backgroundColor={colors.amberBlast}
+                color={colors.navyInk}
+                onPress={() => handleChoose(goal)}
+              >
+                {goal} PALAVRAS
+              </GameButton>
+            ))}
+          </HardShadowBox>
+        </Pressable>
+      </Pressable>
+    </Modal>
   );
 }
 
@@ -504,7 +545,7 @@ const styles = StyleSheet.create({
     fontSize: 42,
     textAlign: 'center',
   },
-  quizSub: { fontFamily: fonts.bold, color: colors.navyInkScrim },
+  quizSub: { fontFamily: fonts.bold, color: colors.navyInkMuted },
   answerError: {
     color: colors.navyInk,
     fontFamily: fonts.black,

@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { GameButton } from '../src/components/GameButton';
+import { GameToast } from '../src/components/GameToast';
 import { HardShadowBox } from '../src/components/HardShadowBox';
 import { PressableWithFeedback } from '../src/components/PressableWithFeedback';
 import {
@@ -117,6 +118,7 @@ export default function SettingsScreen() {
         <PressableWithFeedback
           accessibilityLabel="Voltar"
           onPress={() => router.back()}
+          style={styles.backButton}
         >
           <Text style={styles.back}>←</Text>
         </PressableWithFeedback>
@@ -139,7 +141,7 @@ export default function SettingsScreen() {
       <Section title="Lembrete diário">
         <GameButton
           backgroundColor={notificationsOn ? colors.memsyGreen : colors.lobster}
-          color={colors.chalkWhite}
+          color={colors.navyInk}
           onPress={toggleReminder}
         >
           {notificationsOn ? 'LEMBRETE ATIVO' : 'ATIVAR LEMBRETE'}
@@ -178,6 +180,7 @@ export default function SettingsScreen() {
               <PressableWithFeedback
                 accessibilityLabel={`Remover ${language?.name ?? code}`}
                 onPress={() => confirmRemoveLanguage(code)}
+                style={styles.removeButton}
               >
                 <Text style={styles.remove}>REMOVER</Text>
               </PressableWithFeedback>
@@ -196,7 +199,13 @@ export default function SettingsScreen() {
         </Text>
       </Section>
 
-      {message && <Text style={styles.message}>{message}</Text>}
+      {message && (
+        <GameToast
+          message={message}
+          persistent={false}
+          onClose={() => setMessage(null)}
+        />
+      )}
     </ScrollView>
   );
 }
@@ -244,6 +253,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.sky,
   },
   header: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  backButton: {
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   back: { color: colors.navyInk, fontFamily: fonts.black, fontSize: 36 },
   title: { color: colors.navyInk, fontFamily: fonts.black, fontSize: 32 },
   section: { gap: 12, padding: 18 },
@@ -255,7 +270,9 @@ const styles = StyleSheet.create({
   rowWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   choice: {
     minWidth: 66,
+    minHeight: 44,
     alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderWidth: 2,
@@ -292,17 +309,17 @@ const styles = StyleSheet.create({
     fontFamily: fonts.black,
     fontSize: 11,
   },
+  removeButton: {
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   remove: { color: colors.lobster, fontFamily: fonts.black, fontSize: 12 },
   about: {
     color: colors.navyInk,
     fontFamily: fonts.bold,
     fontSize: 15,
     lineHeight: 20,
-  },
-  message: {
-    color: colors.navyInk,
-    fontFamily: fonts.black,
-    fontSize: 14,
-    textAlign: 'center',
   },
 });

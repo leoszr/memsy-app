@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { Pressable, StyleProp, ViewStyle } from 'react-native';
 import Animated, {
+  ReduceMotion,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -45,10 +46,16 @@ export function PressableWithFeedback({
         onPress={onPress}
         onLongPress={onLongPress}
         onPressIn={() => {
-          scale.value = withTiming(0.94, { duration: 80 });
+          scale.value = withTiming(0.94, {
+            duration: 80,
+            reduceMotion: ReduceMotion.System,
+          });
         }}
         onPressOut={() => {
-          scale.value = withTiming(1, { duration: 120 });
+          scale.value = withTiming(1, {
+            duration: 120,
+            reduceMotion: ReduceMotion.System,
+          });
         }}
         style={style}
       >

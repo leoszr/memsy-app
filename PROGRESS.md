@@ -276,3 +276,22 @@ Status: 🔄 Implementado em código, pendente validação manual em iOS e Andro
 - `npm run lint`: ✅ passou.
 - `npm test -- --runInBand`: ✅ passou (51 testes).
 - `npx tsc --noEmit`: ✅ passou.
+
+## Auditoria UI/UX — Bloco 1 (implementação)
+
+Status: 🔄 Implementado em código, pendente validação manual em iOS e Android físicos.
+
+- UI-05: GameToast acessível com `accessibilityRole="alert"`, `accessibilityLiveRegion="polite"` e `AccessibilityInfo.announceForAccessibility` no iOS. Integrado em add.tsx e settings.tsx.
+- UI-11: Token `navyInkMuted` (#555570, ≈7:1 em chalkWhite) substitui `navyInkScrim` como cor de texto secundário. Botão de toggle em settings usa navyInk sobre memsyGreen/lobster. Contraste fonético da swipe card corrigido.
+- UI-12: Alvos de toque corrigidos para mínimo 44×44 pt: settings gear (add, progress), back button, "VER CARD", escolhas, REMOVER, pill de idioma, ações SALVAR/FORA.
+- UI-13a: LanguagePairPill Modal adiciona `accessibilityViewIsModal`, scrim com label/role e foco inicial.
+- UI-13b: GoalSheet migrada de View absoluta para Modal acessível. Backdrop fecha, não obriga seleção.
+- UI-14: ReduceMotion.System aplicado em todas animações: pulse (add), crossfade (train), scale (PressableWithFeedback), translate (GameButton), pop/spring/fly-out (TranslationSwipeCard).
+- UI-15: Meta diária com `accessibilityRole="progressbar"` + `accessibilityValue`. Barras semanais com label completo (dia, "hoje" quando aplicável, quantidade). Marcador textual "hoje" adicionado.
+- UI-16: Label acessível dos cards do Deck inclui palavra, tradução, status e acertos seguidos. Exclusão é ação separada.
+
+### Verificação local
+
+- `npm run lint`: ✅ passou.
+- `npm test -- --runInBand`: ✅ passou (51 testes).
+- `npx tsc --noEmit`: ✅ passou.
