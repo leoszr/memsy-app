@@ -58,19 +58,24 @@ export default function SettingsScreen() {
 
   async function toggleReminder() {
     const next = notificationsOn ? 'false' : 'true';
-    await updateSettings({ notificationsEnabled: next });
-    await syncDailyReminder(
-      { ...settings, notificationsEnabled: next },
-      todayStats,
-      cards,
-      updateSettings,
-    );
-    const effective = getMemsyStore().getState().settings.notificationsEnabled;
-    setMessage(
-      effective !== 'false'
-        ? 'Lembrete ativado.'
-        : 'Permissão de notificação negada.',
-    );
+    try {
+      await updateSettings({ notificationsEnabled: next });
+      await syncDailyReminder(
+        { ...settings, notificationsEnabled: next },
+        todayStats,
+        cards,
+        updateSettings,
+      );
+      const effective =
+        getMemsyStore().getState().settings.notificationsEnabled;
+      if (effective !== 'false') {
+        setMessage('Lembrete ativado.');
+      } else {
+        setMessage('Lembrete desativado.');
+      }
+    } catch {
+      setMessage('Não consegui alterar o lembrete. Tente novamente.');
+    }
   }
 
   async function chooseLanguage(code: string) {
@@ -191,9 +196,7 @@ export default function SettingsScreen() {
             </View>
           );
         })}
-        <Text style={styles.help}>
-          Adicionar novos idiomas volta no refinamento pós-beta.
-        </Text>
+        <Text style={styles.help}>Novos idiomas disponíveis em breve.</Text>
       </Section>
 
       <Section title="Sobre o Memsy">

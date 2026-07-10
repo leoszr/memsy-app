@@ -20,7 +20,9 @@ export type MemsyState = {
   dailyStats: DailyStat[];
   resultCounts: ResultCounts;
   hydrated: boolean;
+  highlightCardId: string | null;
   hydrate(): Promise<void>;
+  setHighlightCardId(id: string | null): void;
   refreshProgress(): Promise<void>;
   addCard(input: NewCardInput): Promise<Card>;
   saveCard(card: Card): Promise<void>;
@@ -46,6 +48,10 @@ export function createMemsyStore(repos: Repositories) {
     dailyStats: [],
     resultCounts: { wrong: 0, almost: 0, correct: 0 },
     hydrated: false,
+    highlightCardId: null,
+    setHighlightCardId(id) {
+      set({ highlightCardId: id });
+    },
     async hydrate() {
       const settings = await repos.settings.getAll();
       const dailyGoal = Number(settings.dailyGoal ?? 10);

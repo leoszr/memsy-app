@@ -26,7 +26,7 @@ import { TranslationSwipeCard } from '../../src/components/TranslationSwipeCard'
 import { findDuplicateCard } from '../../src/logic';
 import { getDefaultTranslationService } from '../../src/services/TranslationService';
 import { TranslationResult } from '../../src/services/TranslationService.types';
-import { useMemsyStore } from '../../src/store/useMemsyStore';
+import { getMemsyStore, useMemsyStore } from '../../src/store/useMemsyStore';
 import { colors, fonts, radii } from '../../src/theme/tokens';
 
 type PendingTranslation = { word: string; result: TranslationResult };
@@ -246,19 +246,16 @@ export default function Add() {
         </GameButton>
       </Animated.View>
       {duplicate && (
-        <DuplicateBanner onView={() => router.push('/(tabs)/cards')} />
+        <DuplicateBanner
+          onView={() => {
+            getMemsyStore().getState().setHighlightCardId(duplicate.id);
+            router.push('/(tabs)/cards');
+          }}
+        />
       )}
       <View style={styles.tools}>
-        <ToolButton
-          label="📷 Câmera"
-          soon
-          onPress={() => setToast({ message: 'Câmera EM BREVE ✦' })}
-        />
-        <ToolButton
-          label="🎤 Voz"
-          soon
-          onPress={() => setToast({ message: 'Voz EM BREVE ✦' })}
-        />
+        <ToolButton label="📷 Câmera" disabled onPress={() => {}} />
+        <ToolButton label="🎤 Voz" disabled onPress={() => {}} />
         <ToolButton label="📋 Colar" onPress={paste} />
       </View>
       {toast && (
@@ -307,27 +304,31 @@ function Decorations({ swipe }: { swipe?: boolean }) {
 function ToolButton({
   label,
   onPress,
-  soon,
+  disabled,
 }: {
   label: string;
   onPress(): void;
-  soon?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <HardShadowBox
-      backgroundColor={colors.chalkWhite}
+      backgroundColor={disabled ? colors.chalkWhite : colors.chalkWhite}
       radius={12}
-      offsetX={3}
-      offsetY={3}
+      offsetX={disabled ? 0 : 3}
+      offsetY={disabled ? 0 : 3}
+      borderColor={disabled ? colors.navyInkMuted : colors.navyInk}
       contentStyle={styles.toolOuter}
     >
       <PressableWithFeedback
-        accessibilityLabel={label}
+        accessibilityLabel={disabled ? `${label} (indisponível)` : label}
+        accessibilityState={{ disabled: disabled ?? false }}
+        disabled={disabled}
         onPress={onPress}
-        style={styles.tool}
+        style={disabled ? styles.toolDisabled : styles.tool}
       >
-        <Text style={styles.toolText}>{label}</Text>
-        {soon && <Text style={styles.soon}>EM BREVE</Text>}
+        <Text style={[styles.toolText, disabled && styles.toolTextDisabled]}>
+          {label}
+        </Text>
       </PressableWithFeedback>
     </HardShadowBox>
   );
@@ -459,13 +460,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 4,
   },
-  toolText: { color: colors.navyInk, fontFamily: fonts.black, fontSize: 13 },
-  soon: {
-    marginTop: 2,
-    color: colors.lobster,
-    fontFamily: fonts.black,
-    fontSize: 8,
+  toolDisabled: {
+    minHeight: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    opacity: 0.45,
   },
+  toolTextDisabled: {
+    opacity: 0.5,
+  },
+  toolText: { color: colors.navyInk, fontFamily: fonts.black, fontSize: 13 },
   duplicate: {
     flexDirection: 'row',
     alignItems: 'center',

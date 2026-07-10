@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,7 +26,29 @@ export default function Cards() {
   const insets = useSafeAreaInsets();
   const cards = useMemsyStore((state) => state.cards);
   const discardCard = useMemsyStore((state) => state.discardCard);
+  const highlightCardId = useMemsyStore((state) => state.highlightCardId);
+  const setHighlightCardId = useMemsyStore((state) => state.setHighlightCardId);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const flatListRef = useRef<FlatList<Card>>(null);
+
+  useEffect(() => {
+    if (!highlightCardId || cards.length === 0) return;
+    const idx = cards.findIndex((c) => c.id === highlightCardId);
+    if (idx >= 0) {
+      // Small delay so FlatList is laid out
+      const timer = setTimeout(() => {
+        flatListRef.current?.scrollToIndex({
+          index: idx,
+          animated: true,
+          viewPosition: 0.5,
+        });
+        setPendingDelete(highlightCardId);
+        setHighlightCardId(null);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+    setHighlightCardId(null);
+  }, [highlightCardId, cards, setHighlightCardId]);
   const counts = useMemo(
     () => ({
       total: cards.length,
@@ -72,7 +94,19 @@ export default function Cards() {
         </View>
       ) : (
         <FlatList
+          ref={flatListRef}
           data={cards}
+          getItemLayout={(_, index) => ({
+            length: 120,
+            offset: 120 * index + 16 * index,
+            index,
+          })}
+          onScrollToIndexFailed={(info) => {
+            flatListRef.current?.scrollToOffset({
+              offset: info.averageItemLength * info.index,
+              animated: true,
+            });
+          }}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
           renderItem={({ item, index }) => (
